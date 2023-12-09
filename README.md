@@ -48,8 +48,6 @@ Acknowledging limitations in data collection, scope, and methodology, the propos
 This research seeks to offer vital insights into the role of digital tools in shaping competitive dynamics in online marketplaces like Airbnb, highlighting the balance between market efficiency and the risk of collusion.
 
 ## References
-## References
-
 1. Svend Albaek, Peter Mollgaard, and Per B. Overgaard. "Government-assisted oligopoly coordination? A concrete case." Journal of Industrial Economics 45(4):429–443, 1997.
 
 2. Steven Berry, James Levinsohn, and Ariel Pakes. "Automobile prices in market equilibrium." Econometrica 63(4):841–890, 1995.
