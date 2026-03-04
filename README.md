@@ -3,7 +3,7 @@
 ## Abstract
 This project studies whether platform-assisted algorithmic pricing changes seller behavior in ways that are relevant for competition policy. Using listing-level Airbnb data, the empirical design evaluates how pricing dynamics shift around the rollout of Airbnb Smart Pricing and whether those shifts are consistent with greater price coordination risk or with benign efficiency improvements.
 
-The analysis is built around a fuzzy regression discontinuity design (RDD) that exploits policy timing as a quasi-experimental cutoff while allowing incomplete compliance in tool adoption. Rather than assuming deterministic treatment at the cutoff, the design models treatment intensity through listing-night eligibility (`available == 1`) and host-level uptake propensity. This approach targets the local causal effect of increased Smart Pricing exposure on nightly prices, while controlling for listing attributes, host characteristics, and time patterns.
+The analysis is built around a fuzzy regression discontinuity design (RDD) that exploits policy timing as a quasi-experimental cutoff while allowing incomplete compliance in tool adoption. Rather than assuming deterministic treatment at the cutoff, the design models treatment intensity through listing-night eligibility (`available == 1`) and host-level uptake propensity. Under the identifying assumptions of the design, this approach is intended to recover a local causal effect of increased Smart Pricing exposure on nightly prices while controlling for listing attributes, host characteristics, and time patterns. Current estimates should be treated as provisional until full placebo and continuity stress tests are completed.
 
 ## Motivation
 Algorithmic pricing systems can reduce search and adjustment costs, but they can also create synchronized responses to market signals across many sellers. That dual effect is central to modern antitrust debates in digital platforms. Airbnb offers a useful setting because Smart Pricing was introduced with clear timing and heterogeneous host adoption, enabling an empirical test of whether observed price changes are consistent with unilateral optimization or with behavior that could elevate coordination concerns.
@@ -91,7 +91,7 @@ Detailed notes:
 - [`docs/DAY1_problem_framing.md`](docs/DAY1_problem_framing.md)
 - [`docs/DAY1_identification_design.md`](docs/DAY1_identification_design.md)
 
-## Day 2 Multi-City Status (Current)
+## Day 2 Multi-City Status
 - Day 2 pipeline executed via `scripts/day2_build_multicity_panels.py`.
 - Produced the primary daily panel (`fact_listing_day_multicity`) and secondary monthly panel (`agg_city_month_multicity`).
 - Exported ±1m/±2m/±3m windowed extracts and QA outputs under `data/processed/day2/qa/`.
