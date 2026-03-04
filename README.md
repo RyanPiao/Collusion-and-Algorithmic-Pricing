@@ -45,9 +45,12 @@ The core design uses **announcement-date policy timing** with a **fuzzy RDD** im
 ├── Step_2_Data_Clustering.ipynb
 ├── fuzzy_rdd_boston.ipynb
 ├── scripts/
-│   └── day2_build_multicity_panels.py
+│   ├── day2_build_multicity_panels.py
+│   └── day3_multicity_eda.py
+├── day3_multicity_eda.ipynb
 ├── data/
-│   └── processed/day2/ ... (generated Day 2 outputs)
+│   ├── processed/day2/ ... (generated Day 2 outputs)
+│   └── processed/day3/ ... (generated Day 3 EDA outputs)
 └── docs/
     ├── DAY1_IDENTIFICATION.md
     ├── DAY1_ROADMAP.md
@@ -71,6 +74,9 @@ The core design uses **announcement-date policy timing** with a **fuzzy RDD** im
 
 - **`fuzzy_rdd_boston.ipynb`**  
   Main empirical notebook: merge, feature engineering, cutoff construction, fuzzy RDD estimation, and robustness/diagnostic tests.
+
+- **`day3_multicity_eda.ipynb`**  
+  Day 3 descriptive notebook for multicity cutoff-window EDA: city trends, pre/post distribution shifts, support diagnostics, and missingness/data-quality views.
 
 ## Day 1 Status
 Completed foundation work includes:
@@ -122,3 +128,24 @@ Day 2 extends the Boston-focused setup into an 8-city multicity panel with expli
 ### Data-frequency rationale
 - **Daily (primary):** needed for local identification around cutoff timing in fuzzy-RDD style designs.
 - **Monthly (secondary):** used as a robustness and communication layer to validate that directional patterns are not artifacts of high-frequency noise.
+
+## Day 3 Multi-City EDA Around Cutoff
+
+Day 3 adds policy-oriented descriptive outputs on top of Day 2 multicity panels.
+
+### Day 3 outputs
+- **EDA script:** `scripts/day3_multicity_eda.py`
+- **EDA notebook:** `day3_multicity_eda.ipynb`
+- **Trend aggregates:** `data/processed/day3/city_day_trends_cutoff.csv`
+- **Distribution shifts:**
+  - `data/processed/day3/prepost_distribution_stats_city_window.csv`
+  - `data/processed/day3/prepost_distribution_shift_summary.csv`
+- **Treatment-support diagnostics:** `data/processed/day3/treatment_support_diagnostics_city_window.csv`
+- **Missingness/data quality:**
+  - `data/processed/day3/missingness_summary_city.csv`
+  - `data/processed/day3/data_quality_checks_summary.csv`
+- **Figures:**
+  - `docs/figures/day3/city_trend_mean_price_cutoff.png`
+  - `docs/figures/day3/prepost_logprice_distribution_bw1m.png`
+  - `docs/figures/day3/treatment_support_diagnostics.png`
+- **Interpretation note:** `docs/DAY3_eda_note.md`

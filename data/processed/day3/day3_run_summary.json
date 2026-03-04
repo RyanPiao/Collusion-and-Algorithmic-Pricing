@@ -1,0 +1,21 @@
+{
+  "artifacts": {
+    "trend_csv": "data/processed/day3/city_day_trends_cutoff.csv",
+    "dist_stats_csv": "data/processed/day3/prepost_distribution_stats_city_window.csv",
+    "dist_shift_csv": "data/processed/day3/prepost_distribution_shift_summary.csv",
+    "support_csv": "data/processed/day3/treatment_support_diagnostics_city_window.csv",
+    "missingness_csv": "data/processed/day3/missingness_summary_city.csv",
+    "quality_csv": "data/processed/day3/data_quality_checks_summary.csv",
+    "fig_trend": "docs/figures/day3/city_trend_mean_price_cutoff.png",
+    "fig_dist": "docs/figures/day3/prepost_logprice_distribution_bw1m.png",
+    "fig_support": "docs/figures/day3/treatment_support_diagnostics.png",
+    "day3_note": "docs/DAY3_eda_note.md"
+  },
+  "shapes": {
+    "trend_rows": 1472,
+    "distribution_rows": 48,
+    "distribution_shift_rows": 24,
+    "support_rows": 24,
+    "missingness_city_rows": 8
+  }
+}
