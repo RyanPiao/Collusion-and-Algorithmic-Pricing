@@ -50,7 +50,8 @@ The core design uses **announcement-date policy timing** with a **fuzzy RDD** im
     ├── DAY1_STATUS.md
     ├── DAY1_identification_design.md
     ├── DAY1_next_steps.md
-    └── DAY1_problem_framing.md
+    ├── DAY1_problem_framing.md
+    └── DAY2_multicity_data_design.md
 ```
 
 ## Notebook Map
@@ -79,6 +80,11 @@ Detailed notes:
 - [`docs/DAY1_problem_framing.md`](docs/DAY1_problem_framing.md)
 - [`docs/DAY1_identification_design.md`](docs/DAY1_identification_design.md)
 
+## Day 2 Multi-City Status (Current)
+- Multi-city design spec added: [`docs/DAY2_multicity_data_design.md`](docs/DAY2_multicity_data_design.md).
+- Scope documented for 8 target cities and city-level cutoff mapping strategy.
+- Planned outputs are defined (`fact_listing_day_multicity`, `agg_city_month_multicity`, `city_cutoff_map`, QA log), but these materialized data artifacts are not yet committed in this repository snapshot.
+
 ## Planned Day 2+ Roadmap
 1. Finalize treatment coding decisions and document any alternative cutoff/event-window definitions.
 2. Tighten first-stage feature set and report first-stage strength/fit statistics transparently.
@@ -89,3 +95,4 @@ Detailed notes:
 Roadmap details:
 - [`docs/DAY1_ROADMAP.md`](docs/DAY1_ROADMAP.md)
 - [`docs/DAY1_next_steps.md`](docs/DAY1_next_steps.md)
+- [`docs/DAY2_multicity_data_design.md`](docs/DAY2_multicity_data_design.md)
