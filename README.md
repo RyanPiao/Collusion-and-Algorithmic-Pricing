@@ -44,6 +44,10 @@ The core design uses **announcement-date policy timing** with a **fuzzy RDD** im
 ├── calendar_data_cleaning.ipynb
 ├── Step_2_Data_Clustering.ipynb
 ├── fuzzy_rdd_boston.ipynb
+├── scripts/
+│   └── day2_build_multicity_panels.py
+├── data/
+│   └── processed/day2/ ... (generated Day 2 outputs)
 └── docs/
     ├── DAY1_IDENTIFICATION.md
     ├── DAY1_ROADMAP.md
@@ -51,7 +55,8 @@ The core design uses **announcement-date policy timing** with a **fuzzy RDD** im
     ├── DAY1_identification_design.md
     ├── DAY1_next_steps.md
     ├── DAY1_problem_framing.md
-    └── DAY2_multicity_data_design.md
+    ├── DAY2_multicity_data_design.md
+    └── DAY2_STATUS.md
 ```
 
 ## Notebook Map
@@ -86,6 +91,7 @@ Detailed notes:
 - Exported ±1m/±2m/±3m windowed extracts and QA outputs under `data/processed/day2/qa/`.
 - Requested Miami market was unavailable in current source endpoints; Washington DC was used as the approved alternate (logged in `city_selection_audit.csv`).
 - City-specific Smart Pricing rollout dates were not credibly observed from source files; pipeline falls back to auditable pooled cutoffs in `city_cutoff_map.csv`.
+- Full execution summary and QA highlights: [`docs/DAY2_STATUS.md`](docs/DAY2_STATUS.md).
 
 ## Planned Day 2+ Roadmap
 1. Finalize treatment coding decisions and document any alternative cutoff/event-window definitions.
