@@ -1,0 +1,74 @@
+{
+  "input_file": "data/processed/day2/fact_listing_day_multicity_bw_3m.csv.gz",
+  "n_listings_proxy": 131677,
+  "proxy_min": 0.0,
+  "proxy_mean": 0.2913249798507579,
+  "proxy_max": 1.0,
+  "clusters": 4,
+  "outputs": {
+    "listing_latent_proxy": "data/processed/ml_extension/listing_latent_proxy.csv",
+    "listing_cluster_membership": "data/processed/ml_extension/listing_cluster_membership.csv",
+    "first_stage_comparison": "data/processed/ml_extension/first_stage_comparison.csv",
+    "second_stage_comparison": "data/processed/ml_extension/second_stage_comparison.csv"
+  },
+  "first_stage_models": [
+    {
+      "model_name": "first_stage_baseline",
+      "outcome": "available",
+      "treatment": "post_cutoff",
+      "n_obs": 24228568,
+      "k_params": 19,
+      "coef_treatment": -0.04450412952755611,
+      "se_hc1_treatment": 0.00037710112137268634,
+      "t_hc1_treatment": -118.0164338031045,
+      "p_hc1_treatment": 0.0,
+      "ci95_low": -0.04524324772544658,
+      "ci95_high": -0.04376501132966565,
+      "r2": 0.1356612831138828
+    },
+    {
+      "model_name": "first_stage_ml",
+      "outcome": "latent_adoption_propensity_proxy",
+      "treatment": "post_cutoff",
+      "n_obs": 24228568,
+      "k_params": 19,
+      "coef_treatment": 2.6356313727937675e-05,
+      "se_hc1_treatment": 0.00011015221775781881,
+      "t_hc1_treatment": 0.23927174835358095,
+      "p_hc1_treatment": 0.8108948707710979,
+      "ci95_low": -0.0001895420330773872,
+      "ci95_high": 0.00024225466053326254,
+      "r2": 0.1360225339344363
+    }
+  ],
+  "second_stage_models": [
+    {
+      "model_name": "second_stage_baseline",
+      "outcome": "log_price",
+      "treatment": "available",
+      "n_obs": 24228568,
+      "k_params": 19,
+      "coef_treatment": 0.10145095876979937,
+      "se_hc1_treatment": 0.0003394452804851506,
+      "t_hc1_treatment": 298.872792176698,
+      "p_hc1_treatment": 0.0,
+      "ci95_low": 0.10078564602004847,
+      "ci95_high": 0.10211627151955027,
+      "r2": 0.3080003987364014
+    },
+    {
+      "model_name": "second_stage_ml",
+      "outcome": "log_price",
+      "treatment": "latent_adoption_propensity_proxy",
+      "n_obs": 24228568,
+      "k_params": 19,
+      "coef_treatment": 1.4364532926509384,
+      "se_hc1_treatment": 0.0011394710657149697,
+      "t_hc1_treatment": 1260.6316525901648,
+      "p_hc1_treatment": 0.0,
+      "ci95_low": 1.434219929362137,
+      "ci95_high": 1.4386866559397398,
+      "r2": 0.34743953562522145
+    }
+  ]
+}

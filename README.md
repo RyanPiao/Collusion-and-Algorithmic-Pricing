@@ -171,3 +171,37 @@ Day 4 adds a baseline multicity fuzzy-RDD/IV estimation layer aligned with the D
 - Pooled first-stage relevance is strong across all windows (high F-statistics in ±1/±2/±3m).
 - Pooled second-stage local price-level effects are close to zero and statistically imprecise across bandwidths.
 - Placebo-cutoff checks do not show robust alternative breakpoints producing stable significant effects in this baseline setup.
+
+## ML-Econometrics Extension
+
+An additional unsupervised-learning layer constructs a **latent adoption propensity proxy** (not true adoption) using strictly pre-cutoff listing/host characteristics, then compares regression behavior against the baseline availability proxy.
+
+### Method summary
+- Input panel: `data/processed/day2/fact_listing_day_multicity_bw_3m.csv.gz`
+- Pre-cutoff feature build at listing level (`post_cutoff == 0` only) to prevent post-treatment leakage.
+- Preprocessing: `StandardScaler` for numeric features + `OneHotEncoder` for categoricals.
+- Unsupervised models: **KMeans** and **GaussianMixture (GMM)**.
+- Proxy construction: probability-weighted GMM cluster scores from pre-cutoff host/listing readiness signals.
+- Econometric comparison outputs:
+  - First-stage baseline: `available ~ post_cutoff + controls`
+  - First-stage ML: `latent_adoption_propensity_proxy ~ post_cutoff + controls`
+  - Second-stage baseline: `log_price ~ available + controls`
+  - Second-stage ML: `log_price ~ latent_adoption_propensity_proxy + controls`
+
+### Run
+```bash
+source .venv/bin/activate
+python scripts/ml_unsupervised_extension.py --repo-root .
+```
+
+### Extension outputs
+- `data/processed/ml_extension/listing_latent_proxy.csv`
+- `data/processed/ml_extension/listing_cluster_membership.csv`
+- `data/processed/ml_extension/first_stage_comparison.csv`
+- `data/processed/ml_extension/second_stage_comparison.csv`
+- `data/processed/ml_extension/run_summary.json`
+
+### Notes
+- Design note: `docs/ml_extension_design.md`
+- Results note: `docs/ml_extension_results.md`
+- The latent proxy is intended for heterogeneity/proxy analysis and should not be interpreted as observed Smart Pricing adoption.
