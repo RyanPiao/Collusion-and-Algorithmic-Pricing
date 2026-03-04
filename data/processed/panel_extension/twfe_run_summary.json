@@ -1,0 +1,25 @@
+{
+  "estimator": "linearmodels.PanelOLS",
+  "fallback_used": false,
+  "controls_used": [
+    "available",
+    "minimum_nights",
+    "maximum_nights",
+    "post_cutoff",
+    "price_volatility_7d",
+    "price_volatility_14d"
+  ],
+  "nobs": 247664.0,
+  "n_entities": 1346,
+  "n_dates": 184,
+  "rsquared_within": 0.11524378610462227,
+  "rsquared_overall": -30.42065639863937,
+  "sampling": {
+    "control_sample_mod": 100,
+    "treated_listings_retained_all": true,
+    "rows_input_total": 24228568,
+    "rows_kept_after_sampling": 247664,
+    "sampling_share_rows": 0.01022198257858244,
+    "n_treated_listings": 19
+  }
+}

@@ -129,8 +129,62 @@ The ML extension adds a descriptive heterogeneity layer: a latent adoption prope
 
 This should be read as a baseline screening conclusion rather than a final statement on algorithmic coordination risk. The most policy-relevant next steps are richer mechanism-focused designs (dynamic co-movement, dispersion structure, and host-segment heterogeneity) built on stronger treatment observability.
 
+## 9. Longitudinal Causal Extensions
+To move beyond cutoff-local level shifts, we implement a longitudinal panel extension in `data/processed/panel_extension/` using a structural-break adoption proxy and dynamic fixed-effects estimators.
+
+### 9.1 Structural-break adoption proxy
+- Starting panel: `data/processed/day2/fact_listing_day_multicity_bw_3m.csv.gz` (24,228,568 listing-day rows).
+- For each listing, we construct daily absolute price changes and 7-day/14-day rolling volatility metrics.
+- `ruptures` was not available in the runtime, so break detection used a documented fallback CUSUM/binary-segmentation style procedure (`scripts/panel_extension_1_structural_breaks.py`) that flags a break only when post-break volatility exceeds pre-break volatility under minimum-segment and z-score/ratio criteria.
+- Output panel: `dynamic_proxy_panel.csv` with `dynamic_algo_adopted = 1` on/after the listing break date.
+
+Run summary from `structural_break_metadata.json`:
+- Listings evaluated: **131,718**
+- Listings with detected volatility break (adopted): **19**
+- Adopted listing share: **0.0144%**
+- Distinct break dates: **14** (distribution in `break_date_distribution.csv`)
+
+### 9.2 TWFE panel model
+Using `linearmodels.PanelOLS` (listing and date fixed effects; clustered SE by listing), we estimate:
+\[
+\log(price_{it}) = \beta\,dynamic\_algo\_adopted_{it} + X'_{it}\gamma + \alpha_i + \tau_t + \varepsilon_{it}
+\]
+with controls (`available`, `minimum_nights`, `maximum_nights`, rolling volatility controls; `post_cutoff` absorbed).
+
+Because treated listings are sparse under the conservative break proxy, estimation retains all treated listings and a deterministic 1% control-listing sample (247,664 rows) for computational feasibility (`twfe_run_summary.json`).
+
+Key estimate (`twfe_results.csv`):
+- `dynamic_algo_adopted`: **-0.1118** (SE 0.0390, p = 0.0042; 95% CI [-0.1884, -0.0353])
+
+### 9.3 Staggered DiD event study
+Event time is defined as calendar day relative to each listing’s detected break date, estimated on window \([-30, +30]\) with period \(-1\) omitted.
+
+- Estimation uses listing and date FE with clustered SE by listing.
+- Sample keeps all treated listing windows and the same 1% control sample for date-level comparison (245,274 rows).
+- Coefficients and confidence intervals are reported in `event_study_coefficients.csv`; plot in `event_study_plot.png`.
+
+Empirically in this run, event-time coefficients are mostly positive both before and after the break proxy (e.g., day 0: 0.0727, p = 0.0086; day +5: 0.1318, p = 0.0043), with non-flat pre-trend levels (mean pre-period coefficient over [-30,-2] ≈ 0.0604). This pattern indicates that the detected break timing likely co-moves with pre-existing listing-level dynamics rather than isolating a clean quasi-experimental onset.
+
+### 9.4 Spillovers / neighborhood penetration
+We compute neighborhood-day algorithm penetration as the mean adoption among **other active listings** in the same city-neighborhood-date cell (own listing excluded from numerator and denominator). The secondary TWFE specification includes own adoption, neighborhood penetration, and their interaction:
+\[
+\log(price_{it}) = \beta_1 own\_adopt_{it} + \beta_2 pen_{-i,nt} + \beta_3 (own\_adopt_{it}\times pen_{-i,nt}) + X'_{it}\gamma + \alpha_i + \tau_t + \varepsilon_{it}
+\]
+
+From `spillover_results.csv`:
+- `own dynamic adoption`: **-0.1002** (SE 0.0455, p = 0.0278)
+- `neighborhood penetration`: **0.0927** (SE 0.1064, p = 0.3836)
+- `adoption × penetration`: **-6.7332** (SE 8.0392, p = 0.4023)
+
+In this execution, spillover interaction effects are imprecise and statistically weak.
+
+### 9.5 Interpretation and causal caveats
+These extensions are explicitly **causal-intent** rather than definitive causal identification. The dominant constraint is treatment sparsity under a conservative structural-break proxy (19 treated listings), which implies that dynamic effects and spillovers are estimated from limited treated support and are sensitive to proxy design choices. Accordingly, results should be interpreted as a stress-test layer for longitudinal methods, not as stand-alone evidence of algorithmic collusion effects.
+
 ## Reproducibility Pointers
 - Baseline script: `scripts/day4_multicity_fuzzy_rdd.py`
 - Baseline outputs: `data/processed/day4/`
 - Week 2 diagnostics: `data/processed/week2/`
+- Longitudinal extension scripts: `scripts/panel_extension_1_structural_breaks.py`, `scripts/panel_extension_2_twfe.py`, `scripts/panel_extension_3_event_study.py`, `scripts/panel_extension_4_spillovers.py`, `scripts/panel_extension_run_all.py`
+- Longitudinal outputs: `data/processed/panel_extension/`
 - Interpretation notes: `docs/DAY4_interpretation_notes.md`, `docs/week2_*.md`

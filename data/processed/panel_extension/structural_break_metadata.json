@@ -1,0 +1,28 @@
+{
+  "input_panel": "/Users/openclaw/.openclaw/workspace/projects/Collusion-and-Algorithmic-Pricing/data/processed/day2/fact_listing_day_multicity_bw_3m.csv.gz",
+  "output_panel": "/Users/openclaw/.openclaw/workspace/projects/Collusion-and-Algorithmic-Pricing/data/processed/panel_extension/dynamic_proxy_panel.csv",
+  "n_rows_output": 24228568,
+  "n_listings_total": 131718,
+  "n_listings_adopted": 19,
+  "share_listings_adopted": 0.00014424755917945916,
+  "n_unique_break_dates": 14,
+  "break_detection": {
+    "ruptures_available": false,
+    "method_when_unavailable": "fallback_cusum",
+    "criteria": {
+      "min_segment_days": 14,
+      "z_threshold": 2.0,
+      "ratio_threshold": 1.25,
+      "target_shift": "sticky_to_volatile (post mean absolute price change > pre)"
+    },
+    "method_counts": {
+      "fallback_cusum": 131708,
+      "insufficient_length": 10
+    }
+  },
+  "files": {
+    "dynamic_proxy_panel": "/Users/openclaw/.openclaw/workspace/projects/Collusion-and-Algorithmic-Pricing/data/processed/panel_extension/dynamic_proxy_panel.csv",
+    "listing_breaks": "/Users/openclaw/.openclaw/workspace/projects/Collusion-and-Algorithmic-Pricing/data/processed/panel_extension/listing_breaks.csv",
+    "break_date_distribution": "/Users/openclaw/.openclaw/workspace/projects/Collusion-and-Algorithmic-Pricing/data/processed/panel_extension/break_date_distribution.csv"
+  }
+}
