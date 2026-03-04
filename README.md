@@ -81,9 +81,11 @@ Detailed notes:
 - [`docs/DAY1_identification_design.md`](docs/DAY1_identification_design.md)
 
 ## Day 2 Multi-City Status (Current)
-- Multi-city design spec added: [`docs/DAY2_multicity_data_design.md`](docs/DAY2_multicity_data_design.md).
-- Scope documented for 8 target cities and city-level cutoff mapping strategy.
-- Planned outputs are defined (`fact_listing_day_multicity`, `agg_city_month_multicity`, `city_cutoff_map`, QA log), but these materialized data artifacts are not yet committed in this repository snapshot.
+- Day 2 pipeline executed via `scripts/day2_build_multicity_panels.py`.
+- Produced the primary daily panel (`fact_listing_day_multicity`) and secondary monthly panel (`agg_city_month_multicity`).
+- Exported ±1m/±2m/±3m windowed extracts and QA outputs under `data/processed/day2/qa/`.
+- Requested Miami market was unavailable in current source endpoints; Washington DC was used as the approved alternate (logged in `city_selection_audit.csv`).
+- City-specific Smart Pricing rollout dates were not credibly observed from source files; pipeline falls back to auditable pooled cutoffs in `city_cutoff_map.csv`.
 
 ## Planned Day 2+ Roadmap
 1. Finalize treatment coding decisions and document any alternative cutoff/event-window definitions.
@@ -96,3 +98,21 @@ Roadmap details:
 - [`docs/DAY1_ROADMAP.md`](docs/DAY1_ROADMAP.md)
 - [`docs/DAY1_next_steps.md`](docs/DAY1_next_steps.md)
 - [`docs/DAY2_multicity_data_design.md`](docs/DAY2_multicity_data_design.md)
+
+## Day 2 Multi-City Build
+
+Day 2 extends the Boston-focused setup into an 8-city multicity panel with explicit cutoff mapping, daily identification windows, and monthly robustness aggregates.
+
+### What was added
+- **Primary dataset:** `fact_listing_day_multicity` (daily listing-level panel).
+- **Secondary dataset:** `agg_city_month_multicity` (city-month robustness panel).
+- **Window extracts:** ±1, ±2, and ±3 month datasets around the assigned city cutoff.
+- **QA outputs:** city-date coverage, missingness reports, support near cutoff, first-stage prep tables, and consistency checks.
+
+### Cutoff policy for Day 2
+- Pipeline supports city-specific cutoff overrides when credible dates are available.
+- Where city-specific rollout dates are not available, Day 2 uses a pooled fallback cutoff and records this decision in `city_cutoff_map` with source metadata.
+
+### Data-frequency rationale
+- **Daily (primary):** needed for local identification around cutoff timing in fuzzy-RDD style designs.
+- **Monthly (secondary):** used as a robustness and communication layer to validate that directional patterns are not artifacts of high-frequency noise.

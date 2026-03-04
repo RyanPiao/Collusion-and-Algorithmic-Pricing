@@ -1,0 +1,28 @@
+{
+  "selected_cities": [
+    "boston",
+    "new-york-city",
+    "los-angeles",
+    "san-francisco",
+    "austin",
+    "chicago",
+    "seattle",
+    "washington-dc"
+  ],
+  "pooled_cutoff": "2025-09-01",
+  "secondary_cutoff": "2025-10-01",
+  "panel_rows": 24228568,
+  "monthly_rows": 56,
+  "window_counts": {
+    "bw_1m_rows": 8163974,
+    "bw_2m_rows": 16327948,
+    "bw_3m_rows": 24228568
+  },
+  "qa_summary": {
+    "duplicate_city_listing_date": "0",
+    "bad_window_nesting_rows": "0",
+    "misaligned_cutoff_rows": "0",
+    "max_abs_mean_price_diff_city_month": "0.0000000000",
+    "max_n_listing_days_diff_city_month": "0"
+  }
+}

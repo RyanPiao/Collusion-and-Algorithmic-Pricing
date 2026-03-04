@@ -11,15 +11,17 @@ Build a multi-city analysis panel for fuzzy RDD around Airbnb Smart Pricing roll
 
 ## 1) City scope (8 major markets)
 
-Use these cities in Day 2:
-1. New York City (`new-york-city`)
-2. Los Angeles (`los-angeles`)
-3. San Francisco (`san-francisco`)
-4. Chicago (`chicago`)
-5. Boston (`boston`)
-6. Washington, DC (`washington-dc`)
-7. Seattle (`seattle`)
-8. Austin (`austin`)
+Use these cities in Day 2 (requested set):
+1. Boston (`boston`)
+2. New York City (`new-york-city`)
+3. Los Angeles (`los-angeles`)
+4. San Francisco (`san-francisco`)
+5. Miami (`miami`)
+6. Austin (`austin`)
+7. Chicago (`chicago`)
+8. Seattle (`seattle`)
+
+If one requested city is unavailable in current source endpoints, substitute **Washington, DC (`washington-dc`)** as the approved alternate and log this in a city-selection audit table.
 
 > Keep both a display name and canonical slug so joins are stable across files.
 
@@ -92,8 +94,8 @@ Create and version a lookup table: **`city_cutoff_map`** with:
 
 ### Assignment hierarchy
 1. **If credible city-specific rollout date exists**, use it as `cutoff_date_primary`.
-2. Else use global default primary cutoff: **2023-03-25**.
-3. Keep **2023-05-25** as secondary/common sensitivity cutoff when city-specific public rollout is unavailable.
+2. Else use a pooled fallback `cutoff_date_primary` (configured in the Day 2 build script; auditable in `city_cutoff_map`).
+3. Keep a pooled `cutoff_date_secondary` for sensitivity runs.
 4. Persist source metadata so date choices are auditable.
 
 ### Implementation notes

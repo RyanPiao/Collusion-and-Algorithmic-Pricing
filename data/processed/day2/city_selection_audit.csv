@@ -1,0 +1,10 @@
+city_slug,city_name,requested,included_in_panel,replacement_city_slug,reason
+boston,Boston,1,1,,requested_city_available
+new-york-city,New York City,1,1,,requested_city_available
+los-angeles,Los Angeles,1,1,,requested_city_available
+san-francisco,San Francisco,1,1,,requested_city_available
+miami,Miami,1,0,washington-dc,requested_city_not_available_in_current_insideairbnb_endpoint
+austin,Austin,1,1,,requested_city_available
+chicago,Chicago,1,1,,requested_city_available
+seattle,Seattle,1,1,,requested_city_available
+washington-dc,Washington DC,0,1,,approved_alternate_for:miami

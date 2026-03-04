@@ -1,0 +1,6 @@
+# Day 2 raw downloads and large generated panels
+/data/raw/day2/
+/data/processed/day2/fact_listing_day_multicity.csv.gz
+/data/processed/day2/fact_listing_day_multicity_bw_1m.csv.gz
+/data/processed/day2/fact_listing_day_multicity_bw_2m.csv.gz
+/data/processed/day2/fact_listing_day_multicity_bw_3m.csv.gz
