@@ -1,0 +1,9 @@
+{
+  "first_stage_table": "data/processed/day4/first_stage_strength_city_window.csv",
+  "second_stage_pooled": "data/processed/day4/second_stage_pooled_window_estimates.csv",
+  "second_stage_city": "data/processed/day4/second_stage_city_window_estimates.csv",
+  "diagnostic_bandwidth": "data/processed/day4/diagnostic_bandwidth_sensitivity_pooled.csv",
+  "diagnostic_placebo": "data/processed/day4/diagnostic_placebo_cutoff_pooled_bw3m.csv",
+  "pooled_window_rows": 3,
+  "city_window_rows": 24
+}

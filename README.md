@@ -46,11 +46,13 @@ The core design uses **announcement-date policy timing** with a **fuzzy RDD** im
 ├── fuzzy_rdd_boston.ipynb
 ├── scripts/
 │   ├── day2_build_multicity_panels.py
-│   └── day3_multicity_eda.py
+│   ├── day3_multicity_eda.py
+│   └── day4_multicity_fuzzy_rdd.py
 ├── day3_multicity_eda.ipynb
 ├── data/
 │   ├── processed/day2/ ... (generated Day 2 outputs)
-│   └── processed/day3/ ... (generated Day 3 EDA outputs)
+│   ├── processed/day3/ ... (generated Day 3 EDA outputs)
+│   └── processed/day4/ ... (generated Day 4 baseline IV outputs)
 └── docs/
     ├── DAY1_IDENTIFICATION.md
     ├── DAY1_ROADMAP.md
@@ -149,3 +151,23 @@ Day 3 adds policy-oriented descriptive outputs on top of Day 2 multicity panels.
   - `docs/figures/day3/prepost_logprice_distribution_bw1m.png`
   - `docs/figures/day3/treatment_support_diagnostics.png`
 - **Interpretation note:** `docs/DAY3_eda_note.md`
+
+## Day 4 Multi-City Fuzzy RDD Baseline
+
+Day 4 adds a baseline multicity fuzzy-RDD/IV estimation layer aligned with the Day 1 design intent (local estimation around policy cutoff windows with explicit first-stage reporting).
+
+### Day 4 outputs
+- **Model script:** `scripts/day4_multicity_fuzzy_rdd.py`
+- **First-stage strength table:** `data/processed/day4/first_stage_strength_city_window.csv`
+- **Second-stage pooled estimates:** `data/processed/day4/second_stage_pooled_window_estimates.csv`
+- **Second-stage city-window estimates:** `data/processed/day4/second_stage_city_window_estimates.csv`
+- **Diagnostics:**
+  - `data/processed/day4/diagnostic_bandwidth_sensitivity_pooled.csv`
+  - `data/processed/day4/diagnostic_placebo_cutoff_pooled_bw3m.csv`
+- **Run summary:** `data/processed/day4/day4_run_summary.json`
+- **Interpretation note:** `docs/DAY4_interpretation_notes.md`
+
+### Headline Day 4 readout
+- Pooled first-stage relevance is strong across all windows (high F-statistics in ±1/±2/±3m).
+- Pooled second-stage local price-level effects are close to zero and statistically imprecise across bandwidths.
+- Placebo-cutoff checks do not show robust alternative breakpoints producing stable significant effects in this baseline setup.
