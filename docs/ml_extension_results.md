@@ -67,3 +67,59 @@ Readout: listings with higher latent adoption propensity proxy values are strong
 3. **Specification dependence**: magnitude depends on feature engineering, clustering choices, and normalization.
 4. **Time-invariant proxy behavior**: the weak first-stage shift for the latent proxy is mechanically consistent with pre-cutoff construction.
 5. **Policy inference caution**: use this extension as a heterogeneity/proxy layer, not a replacement for validated treatment measurement or full IV identification.
+
+## Refined Dynamic Proxy and Heterogeneous Effects
+
+### Dynamic pre-cutoff feature redesign (leakage-safe)
+The refined pipeline in `scripts/ml_unsupervised_extension.py` now computes behavioral features using **only** rows where `post_cutoff == 0`:
+
+- `price_variance_pre`: listing-level variance of daily `log_price` before cutoff.
+- `weekend_premium_pre`: mean(`price_usd` on Fri/Sat) minus mean(`price_usd` on weekdays) before cutoff.
+- `price_change_frequency_pre`: share of pre-cutoff day-to-day transitions with a non-zero price change.
+
+Implementation notes:
+- Missing variance for listings with <2 pre-cutoff observations is median-imputed (post-filter, pre-clustering).
+- Weekend premium / change frequency missingness is also median-imputed to retain listings while preventing leakage.
+- Dynamic features are added to the standardized clustering feature matrix along with the existing static/pre-period features.
+
+### Updated latent proxy (GMM k=4)
+The unsupervised stage reruns KMeans/GMM with the expanded feature set and exports:
+
+- `data/processed/ml_extension/listing_features_refined.csv`
+- `data/processed/ml_extension/listing_cluster_membership.csv`
+- `data/processed/ml_extension/listing_latent_proxy.csv`
+- `data/processed/ml_extension/run_summary.json`
+
+`run_summary.json` now reports the refined latent proxy distribution (`min`, `mean`, `max`) for the updated `latent_adoption_propensity_proxy`.
+
+### Heterogeneous fuzzy-RDD / IV interaction model
+The refined evaluation includes an interaction IV design:
+
+- **First stage**: `available ~ post_cutoff + latent_proxy + post_cutoff*latent_proxy + controls`
+- **Second stage**: `log_price ~ available_hat + latent_proxy + available_hat*latent_proxy + controls`
+
+Export:
+- `data/processed/ml_extension/heterogeneous_iv_interaction_results.csv`
+
+This file contains HC1 robust coefficient tables for both stages (including interaction terms):
+- First-stage interaction: `post_x_latent`
+- Second-stage heterogeneous treatment interaction: `available_hat_x_latent`
+
+### PSM-style High-vs-Low propensity DiD + Event Study
+New script: `scripts/ml_extension_psm_did.py`
+
+Design:
+- High propensity (treatment): top quartile of latent proxy.
+- Low propensity (control): bottom quartile of latent proxy.
+- TWFE DiD around rollout/event time 0 on this restricted sample.
+- Event-study dynamics over a symmetric window (default `[-30, 30]`, reference period `t=-1`).
+
+Exports:
+- `data/processed/ml_extension/psm_did_twfe_results.csv`
+- `data/processed/ml_extension/psm_did_event_study.csv`
+- `data/processed/ml_extension/psm_did_event_study_plot.png`
+- `data/processed/ml_extension/psm_did_summary.json`
+
+Interpretation focus:
+- `high_propensity_x_post` in TWFE DiD captures differential post-rollout price response for high-vs-low propensity listings.
+- Event-study coefficients trace pre-trend validity and dynamic post effects by propensity group.
