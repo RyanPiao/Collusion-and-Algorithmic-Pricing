@@ -1,93 +1,55 @@
-# Algorithmic Pricing, Market Conduct, and Antitrust Risk in U.S. Major Cities
+# Algorithmic Pricing, Market Conduct, and Antitrust Risk in Short-Term Rentals: Evidence from Airbnb Smart Pricing
 
-## About This Project
-This repository studies whether Airbnb Smart Pricing rollout timing is associated with local discontinuities in listing-level prices, and whether any effects are concentrated in latent high-propensity host segments.
+## Abstract
+This project studies whether platform-assisted algorithmic pricing is associated with discontinuous changes in Airbnb listing prices or fosters tacit collusion. Using an eight-city daily panel (Austin, Boston, Chicago, Los Angeles, New York City, San Francisco, Seattle, Washington, DC), we implement a multicity fuzzy-RDD/IV design, an unsupervised machine learning heterogeneity extension, and longitudinal panel methods (TWFE and Propensity-Stratified DiD).
 
-The project combines:
-- a multicity fuzzy RDD / IV baseline,
-- robustness and diagnostic checks,
-- an ML-econometrics heterogeneity extension,
-- panel/event-study follow-on analyses,
-- and a working-paper synthesis.
+Our baseline pooled estimates indicate that the instrumented local price-level effects around rollout are economically small and statistically imprecise across all tested bandwidths (e.g., **0.0027**, p > 0.05 at ±3 months). However, using a refined latent adoption proxy built from pre-treatment dynamic pricing behavior, we find significant heterogeneity. Furthermore, longitudinal Two-Way Fixed Effects (TWFE) models relying on structural volatility breaks reveal the true causal footprint of the algorithm: **algorithmic adoption does not raise baseline average prices, but it significantly increases forward-looking price volatility (p < 0.001).** We find no evidence of neighborhood spatial spillovers (price umbrellas). The algorithm acts as a productivity multiplier for sophisticated hosts, driving complex price discrimination rather than market-wide rent inflation.
 
-Primary paper draft:
-- `docs/working_paper_us_major_cities.md`
+## Motivation
+Algorithmic pricing systems can reduce search and adjustment costs, but they can also create synchronized responses to market signals across many sellers. That dual effect is central to modern antitrust debates in digital platforms. Airbnb offers a useful setting because Smart Pricing was introduced with clear timing and heterogeneous host adoption, enabling an empirical test of whether observed price changes are consistent with unilateral optimization or with behavior that could elevate coordination concerns.
 
----
+## Research Question and Hypothesis
+### Research Question
+How does increased exposure to Airbnb Smart Pricing affect host nightly pricing behavior (both price levels and price volatility) around the policy introduction window?
 
-## Final Empirical Readout (Current)
-Based on the working paper and latest repository outputs:
+### Hypothesis
+- **H1 (Level vs. Volatility):** Algorithmic pricing adoption does not uniformly raise baseline price levels, but rather increases the frequency and variance of price adjustments (price discrimination).
+- **H2 (Heterogeneity):** The behavioral impact of the algorithm is concentrated among already-sophisticated hosts who face cognitive constraints in manual dynamic pricing.
+- **H3 (Coordination/Spillovers):** If the algorithm facilitates tacit collusion, we should observe "price umbrellas" where non-adopting hosts raise prices when surrounded by high algorithmic penetration.
 
-1. **Average market effect (baseline Step 4):**
-   pooled second-stage coefficients are near zero and statistically imprecise across ±1m / ±2m / ±3m windows.
-2. **First stage:**
-   pooled instrument relevance is strong in baseline proxy specifications.
-3. **Diagnostics:**
-   bandwidth and placebo checks do not reveal a stable, robust alternative discontinuity.
-4. **Heterogeneity extension:**
-   refined pre-cutoff latent propensity modeling identifies strong cross-sectional heterogeneity signals, but does not overturn the baseline near-null average discontinuity result.
-5. **Interpretation discipline:**
-   findings are consistent with heterogeneity in levels/responsiveness rather than a large immediate pooled price-level break at cutoff.
+## Identification Strategy (Summary)
+The core design uses **announcement-date policy timing** with a **fuzzy RDD** implementation, supplemented by **Machine Learning** and **Longitudinal Panel** methods.
 
----
-
-## Critical Data Limitation (Explicit)
-Inside Airbnb is built from **periodic forward-calendar scrapes** (e.g., monthly/quarterly). Therefore, the constructed “daily panel” reflects scheduled prices visible at scrape time, not continuous real-time step-to-day edits between scrapes.
-
-Accordingly, volatility findings should be interpreted as evidence of **differentiated forward price scheduling** (calendar complexity), not definitive proof of continuous within-interval dynamic repricing.
-
-(See Section 7 in `docs/working_paper_us_major_cities.md`.)
-
----
+1. **Baseline Fuzzy RDD / IV:** Uses Smart Pricing rollout timing (`post_cutoff`) as an instrument for listing-day availability (`available`) to test for immediate, market-wide level shifts.
+2. **Unsupervised Latent Adoption Propensity:** Uses KMeans/GMM clustering on *strictly pre-cutoff* static and dynamic features (e.g., pre-cutoff price variance, weekend premiums) to identify host sophistication and proxy algorithmic uptake without post-treatment leakage.
+3. **Heterogeneous Treatment Effects (Interacted IV) & PSM-DiD:** Interacts the RDD instrument with the latent proxy, and runs a Propensity-Stratified Difference-in-Differences comparing the top quartile (High Propensity) to the bottom quartile (Low Propensity).
+4. **Structural Breaks & TWFE Panel:** Uses `ruptures` to detect behavioral shifts in rolling price variance to proxy exact adoption timing, then applies Two-Way Fixed Effects models to isolate within-listing changes in price levels and volatility.
 
 ## Repository Structure
 ```text
 .
 ├── README.md
-├── docs/
-│   ├── working_paper_us_major_cities.md
-│   ├── ml_extension_results.md
-│   ├── DAY*_STATUS.md, WEEK2_*.md, and interpretation notes
+├── Step_1_Data_Cleaning.ipynb
+├── calendar_data_cleaning.ipynb
+├── Step_2_Data_Clustering.ipynb
+├── fuzzy_rdd_boston.ipynb
 ├── scripts/
-│   ├── step2_build_multicity_panels.py
-│   ├── step3_multicity_eda.py
-│   ├── step4_multicity_fuzzy_rdd.py
+│   ├── day2_build_multicity_panels.py
+│   ├── day3_multicity_eda.py
+│   ├── day4_multicity_fuzzy_rdd.py
 │   ├── ml_unsupervised_extension.py
 │   ├── ml_extension_psm_did.py
-│   └── panel_extension_*.py
-└── data/processed/
-    ├── step2/
-    ├── step3/
-    ├── step4/
-    ├── ml_extension/
-    └── panel_extension/
-```
-
----
-
-## Reproducibility (Core)
-Create environment and run core pipeline:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-pip install numpy pandas scikit-learn scipy statsmodels linearmodels matplotlib
-
-python scripts/step2_build_multicity_panels.py
-python scripts/step3_multicity_eda.py
-python scripts/step4_multicity_fuzzy_rdd.py
-```
-
-Run refined ML heterogeneity extension:
-
-```bash
-python scripts/ml_unsupervised_extension.py --repo-root .
-python scripts/ml_extension_psm_did.py --repo-root .
-```
-
----
-
-## Scope and Claims
-- This repo is designed for transparent empirical workflow and policy-relevant diagnostics.
-- Latent proxy measures are **not** direct Smart Pricing adoption telemetry.
-- Results should be interpreted as quasi-experimental evidence under stated assumptions and known data-construction limits.
+│   ├── panel_extension_1_structural_breaks.py
+│   ├── panel_extension_2_twfe.py
+│   ├── panel_extension_3_event_study.py
+│   ├── panel_extension_4_spillovers.py
+│   └── panel_extension_run_all.py
+├── data/
+│   ├── processed/day2/ ... (generated Day 2 outputs)
+│   ├── processed/day3/ ... (generated Day 3 EDA outputs)
+│   ├── processed/day4/ ... (generated Day 4 baseline IV outputs)
+│   ├── processed/ml_extension/ ... (generated ML interaction & PSM outputs)
+│   └── processed/panel_extension/ ... (generated TWFE & structural break outputs)
+└── docs/
+    ├── working_paper_us_major_cities.md
+    └── ... (design and status documentation)
