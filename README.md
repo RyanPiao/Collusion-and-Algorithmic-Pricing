@@ -18,7 +18,7 @@ Primary paper draft:
 ## Final Empirical Readout (Current)
 Based on the working paper and latest repository outputs:
 
-1. **Average market effect (baseline Day 4):**
+1. **Average market effect (baseline Step 4):**
    pooled second-stage coefficients are near zero and statistically imprecise across ±1m / ±2m / ±3m windows.
 2. **First stage:**
    pooled instrument relevance is strong in baseline proxy specifications.
@@ -32,7 +32,7 @@ Based on the working paper and latest repository outputs:
 ---
 
 ## Critical Data Limitation (Explicit)
-Inside Airbnb is built from **periodic forward-calendar scrapes** (e.g., monthly/quarterly). Therefore, the constructed “daily panel” reflects scheduled prices visible at scrape time, not continuous real-time day-to-day edits between scrapes.
+Inside Airbnb is built from **periodic forward-calendar scrapes** (e.g., monthly/quarterly). Therefore, the constructed “daily panel” reflects scheduled prices visible at scrape time, not continuous real-time step-to-day edits between scrapes.
 
 Accordingly, volatility findings should be interpreted as evidence of **differentiated forward price scheduling** (calendar complexity), not definitive proof of continuous within-interval dynamic repricing.
 
@@ -49,16 +49,16 @@ Accordingly, volatility findings should be interpreted as evidence of **differen
 │   ├── ml_extension_results.md
 │   ├── DAY*_STATUS.md, WEEK2_*.md, and interpretation notes
 ├── scripts/
-│   ├── day2_build_multicity_panels.py
-│   ├── day3_multicity_eda.py
-│   ├── day4_multicity_fuzzy_rdd.py
+│   ├── step2_build_multicity_panels.py
+│   ├── step3_multicity_eda.py
+│   ├── step4_multicity_fuzzy_rdd.py
 │   ├── ml_unsupervised_extension.py
 │   ├── ml_extension_psm_did.py
 │   └── panel_extension_*.py
 └── data/processed/
-    ├── day2/
-    ├── day3/
-    ├── day4/
+    ├── step2/
+    ├── step3/
+    ├── step4/
     ├── ml_extension/
     └── panel_extension/
 ```
@@ -73,9 +73,9 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install numpy pandas scikit-learn scipy statsmodels linearmodels matplotlib
 
-python scripts/day2_build_multicity_panels.py
-python scripts/day3_multicity_eda.py
-python scripts/day4_multicity_fuzzy_rdd.py
+python scripts/step2_build_multicity_panels.py
+python scripts/step3_multicity_eda.py
+python scripts/step4_multicity_fuzzy_rdd.py
 ```
 
 Run refined ML heterogeneity extension:
