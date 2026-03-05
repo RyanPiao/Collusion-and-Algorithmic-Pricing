@@ -179,7 +179,22 @@ From `spillover_results.csv`:
 In this execution, spillover interaction effects are imprecise and statistically weak.
 
 ### 9.5 Interpretation and causal caveats
-These extensions are explicitly **causal-intent** rather than definitive causal identification. The dominant constraint is treatment sparsity under a conservative structural-break proxy (19 treated listings), which implies that dynamic effects and spillovers are estimated from limited treated support and are sensitive to proxy design choices. Accordingly, results should be interpreted as a stress-test layer for longitudinal methods, not as stand-alone evidence of algorithmic collusion effects.
+These extensions are explicitly **causal-intent** rather than definitive causal identification. Estimates should be interpreted as stress-test evidence for longitudinal methods, not stand-alone proof of algorithmic collusion effects.
+
+### 9.6 Recalibrated panel extension (corrected run)
+The panel extension was re-run with explicit term-preserving exports and corrected event-study output coverage.
+
+- **Structural-break proxy:** `ruptures.Pelt` (selected model `rbf`) with adopted share **13.35%** (**17,580 / 131,712** listings), which remains within the calibrated **5%-20%** target (`structural_break_metadata.json`).
+- **TWFE levels (`twfe_results_levels.csv`)**
+  - `dynamic_algo_adopted`: **0.0000446** (SE 0.0000275, p = 0.1054; 95% CI [-0.0000094, 0.0000986]).
+- **TWFE volatility (`twfe_results_volatility.csv`)**
+  - `dynamic_algo_adopted` on `abs_price_change`: **-0.0030312** (SE 0.0094549, p = 0.7485; 95% CI [-0.0215624, 0.0155001]).
+  - `dynamic_algo_adopted` on `rolling_7d_variance`: **0.0046971** (SE 0.0001203, p < 0.001; 95% CI [0.0044613, 0.0049330]).
+- **Spillovers (`spillover_results.csv`)**
+  - `dynamic_algo_adopted`: **0.0000769** (SE 0.0000524, p = 0.1421; 95% CI [-0.0000258, 0.0001795]).
+  - `algo_penetration_1km`: **-0.0000050** (SE 0.0000321, p = 0.8775; 95% CI [-0.0000679, 0.0000580]).
+  - `dynamic_x_penetration`: **-0.0000629** (SE 0.0000758, p = 0.4063; 95% CI [-0.0002115, 0.0000856]).
+- **Event-study detrended model (`event_study_coefficients.csv`)** uses listing-specific linear trend residualization and now exports the **full [-30, +30] window** (61 rows including reference period `-1`; event times `+29` and `+30` are explicitly present as absorbed/dropped).
 
 ## Reproducibility Pointers
 - Baseline script: `scripts/day4_multicity_fuzzy_rdd.py`

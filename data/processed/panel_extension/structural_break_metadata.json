@@ -2,22 +2,208 @@
   "input_panel": "/Users/openclaw/.openclaw/workspace/projects/Collusion-and-Algorithmic-Pricing/data/processed/day2/fact_listing_day_multicity_bw_3m.csv.gz",
   "output_panel": "/Users/openclaw/.openclaw/workspace/projects/Collusion-and-Algorithmic-Pricing/data/processed/panel_extension/dynamic_proxy_panel.csv",
   "n_rows_output": 24228568,
-  "n_listings_total": 131718,
-  "n_listings_adopted": 19,
-  "share_listings_adopted": 0.00014424755917945916,
-  "n_unique_break_dates": 14,
+  "n_listings_total": 131712,
+  "n_listings_adopted": 17580,
+  "share_listings_adopted": 0.13347303206997085,
+  "n_unique_break_dates": 157,
   "break_detection": {
-    "ruptures_available": false,
-    "method_when_unavailable": "fallback_cusum",
-    "criteria": {
-      "min_segment_days": 14,
-      "z_threshold": 2.0,
-      "ratio_threshold": 1.25,
-      "target_shift": "sticky_to_volatile (post mean absolute price change > pre)"
+    "algorithm": "ruptures.Pelt",
+    "volatility_signals": [
+      "availability_volatility_7d",
+      "availability_volatility_14d"
+    ],
+    "selected_model": "rbf",
+    "selected_penalty_scale": 1.1,
+    "selected_thresholds": {
+      "abs_z_threshold": 6.0,
+      "symmetric_ratio_threshold": 1.01,
+      "min_segment_days": 14
     },
+    "target_adoption_share_range": [
+      0.05,
+      0.2
+    ],
     "method_counts": {
-      "fallback_cusum": 131708,
-      "insufficient_length": 10
+      "ruptures_pelt_rbf_rejected": 114122,
+      "ruptures_pelt_rbf": 17580,
+      "no_valid_signal_break_rejected": 10
+    },
+    "tuning": {
+      "tuning_sample_mod": 101,
+      "n_listings_seen_in_pass": 131711,
+      "n_listings_in_tuning_sample": 1320,
+      "target_adoption_range": [
+        0.05,
+        0.2
+      ],
+      "selected_sample_share": 0.12954545454545455,
+      "top_grid_candidates": [
+        {
+          "model": "rbf",
+          "penalty_scale": 1.1,
+          "z_threshold": 6.0,
+          "ratio_threshold": 1.01,
+          "adoption_share_sample": 0.12954545454545455,
+          "in_target_range": true,
+          "distance_to_midpoint": 0.004545454545454547,
+          "sample_listings": 1320,
+          "target_gap": 0.004545454545454547
+        },
+        {
+          "model": "rbf",
+          "penalty_scale": 1.1,
+          "z_threshold": 6.0,
+          "ratio_threshold": 1.03,
+          "adoption_share_sample": 0.12954545454545455,
+          "in_target_range": true,
+          "distance_to_midpoint": 0.004545454545454547,
+          "sample_listings": 1320,
+          "target_gap": 0.004545454545454547
+        },
+        {
+          "model": "rbf",
+          "penalty_scale": 1.1,
+          "z_threshold": 6.0,
+          "ratio_threshold": 1.05,
+          "adoption_share_sample": 0.12954545454545455,
+          "in_target_range": true,
+          "distance_to_midpoint": 0.004545454545454547,
+          "sample_listings": 1320,
+          "target_gap": 0.004545454545454547
+        },
+        {
+          "model": "rbf",
+          "penalty_scale": 1.1,
+          "z_threshold": 6.0,
+          "ratio_threshold": 1.08,
+          "adoption_share_sample": 0.12954545454545455,
+          "in_target_range": true,
+          "distance_to_midpoint": 0.004545454545454547,
+          "sample_listings": 1320,
+          "target_gap": 0.004545454545454547
+        },
+        {
+          "model": "rbf",
+          "penalty_scale": 1.1,
+          "z_threshold": 6.0,
+          "ratio_threshold": 1.1,
+          "adoption_share_sample": 0.12954545454545455,
+          "in_target_range": true,
+          "distance_to_midpoint": 0.004545454545454547,
+          "sample_listings": 1320,
+          "target_gap": 0.004545454545454547
+        },
+        {
+          "model": "rbf",
+          "penalty_scale": 0.8,
+          "z_threshold": 6.0,
+          "ratio_threshold": 1.01,
+          "adoption_share_sample": 0.1340909090909091,
+          "in_target_range": true,
+          "distance_to_midpoint": 0.009090909090909094,
+          "sample_listings": 1320,
+          "target_gap": 0.009090909090909094
+        },
+        {
+          "model": "rbf",
+          "penalty_scale": 0.8,
+          "z_threshold": 6.0,
+          "ratio_threshold": 1.03,
+          "adoption_share_sample": 0.1340909090909091,
+          "in_target_range": true,
+          "distance_to_midpoint": 0.009090909090909094,
+          "sample_listings": 1320,
+          "target_gap": 0.009090909090909094
+        },
+        {
+          "model": "rbf",
+          "penalty_scale": 0.8,
+          "z_threshold": 6.0,
+          "ratio_threshold": 1.05,
+          "adoption_share_sample": 0.1340909090909091,
+          "in_target_range": true,
+          "distance_to_midpoint": 0.009090909090909094,
+          "sample_listings": 1320,
+          "target_gap": 0.009090909090909094
+        },
+        {
+          "model": "rbf",
+          "penalty_scale": 0.8,
+          "z_threshold": 6.0,
+          "ratio_threshold": 1.08,
+          "adoption_share_sample": 0.1340909090909091,
+          "in_target_range": true,
+          "distance_to_midpoint": 0.009090909090909094,
+          "sample_listings": 1320,
+          "target_gap": 0.009090909090909094
+        },
+        {
+          "model": "rbf",
+          "penalty_scale": 0.8,
+          "z_threshold": 6.0,
+          "ratio_threshold": 1.1,
+          "adoption_share_sample": 0.1340909090909091,
+          "in_target_range": true,
+          "distance_to_midpoint": 0.009090909090909094,
+          "sample_listings": 1320,
+          "target_gap": 0.009090909090909094
+        },
+        {
+          "model": "rbf",
+          "penalty_scale": 0.55,
+          "z_threshold": 6.0,
+          "ratio_threshold": 1.01,
+          "adoption_share_sample": 0.13787878787878788,
+          "in_target_range": true,
+          "distance_to_midpoint": 0.012878787878787878,
+          "sample_listings": 1320,
+          "target_gap": 0.012878787878787878
+        },
+        {
+          "model": "rbf",
+          "penalty_scale": 0.55,
+          "z_threshold": 6.0,
+          "ratio_threshold": 1.03,
+          "adoption_share_sample": 0.13787878787878788,
+          "in_target_range": true,
+          "distance_to_midpoint": 0.012878787878787878,
+          "sample_listings": 1320,
+          "target_gap": 0.012878787878787878
+        },
+        {
+          "model": "rbf",
+          "penalty_scale": 0.55,
+          "z_threshold": 6.0,
+          "ratio_threshold": 1.05,
+          "adoption_share_sample": 0.13787878787878788,
+          "in_target_range": true,
+          "distance_to_midpoint": 0.012878787878787878,
+          "sample_listings": 1320,
+          "target_gap": 0.012878787878787878
+        },
+        {
+          "model": "rbf",
+          "penalty_scale": 0.55,
+          "z_threshold": 6.0,
+          "ratio_threshold": 1.08,
+          "adoption_share_sample": 0.13787878787878788,
+          "in_target_range": true,
+          "distance_to_midpoint": 0.012878787878787878,
+          "sample_listings": 1320,
+          "target_gap": 0.012878787878787878
+        },
+        {
+          "model": "rbf",
+          "penalty_scale": 0.55,
+          "z_threshold": 6.0,
+          "ratio_threshold": 1.1,
+          "adoption_share_sample": 0.13787878787878788,
+          "in_target_range": true,
+          "distance_to_midpoint": 0.012878787878787878,
+          "sample_listings": 1320,
+          "target_gap": 0.012878787878787878
+        }
+      ]
     }
   },
   "files": {

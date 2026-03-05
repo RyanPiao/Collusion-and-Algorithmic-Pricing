@@ -2,13 +2,17 @@
 from __future__ import annotations
 
 import json
+import logging
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pandas as pd
+from sklearn.neighbors import BallTree
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data/processed/panel_extension"
+RAW_DAY2 = ROOT / "data/raw/day2"
 OUT.mkdir(parents=True, exist_ok=True)
 
 PANEL_PATH = OUT / "dynamic_proxy_panel.csv"
@@ -19,15 +23,59 @@ PEN_SUMMARY_CSV = OUT / "neighborhood_penetration_summary.csv"
 SUMMARY_JSON = OUT / "spillover_run_summary.json"
 
 CONTROL_SAMPLE_MOD = 100  # keep ~1% non-adopters + all adopters for TWFE estimation.
+RADIUS_KM = 1.0
+EARTH_RADIUS_KM = 6371.0088
+SPILLOVER_OWN_TERM = "dynamic_algo_adopted"
+SPILLOVER_PEN_TERM = "algo_penetration_1km"
+SPILLOVER_INTERACTION_TERM = "dynamic_x_penetration"
+
+LOGGER = logging.getLogger("panel_extension_4")
 
 
-def header_and_cols() -> tuple[str, list[str], dict[str, str]]:
+def configure_logging() -> None:
+    logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
+
+
+def get_treated_ids() -> set[int]:
+    breaks = pd.read_csv(BREAKS_PATH, usecols=["listing_id", "adopted"])
+    return set(breaks.loc[breaks["adopted"] == 1, "listing_id"].astype("int64").tolist())
+
+
+def load_listing_coordinates() -> pd.DataFrame:
+    rows: list[pd.DataFrame] = []
+    for listings_path in RAW_DAY2.glob("*/listings.csv.gz"):
+        city_slug = listings_path.parent.name
+        try:
+            df = pd.read_csv(
+                listings_path,
+                compression="gzip",
+                usecols=["id", "latitude", "longitude"],
+                low_memory=False,
+            )
+            df = df.rename(columns={"id": "listing_id"})
+            df["listing_id"] = pd.to_numeric(df["listing_id"], errors="coerce").astype("Int64")
+            df["latitude"] = pd.to_numeric(df["latitude"], errors="coerce")
+            df["longitude"] = pd.to_numeric(df["longitude"], errors="coerce")
+            df = df.dropna(subset=["listing_id", "latitude", "longitude"]).copy()
+            df["listing_id"] = df["listing_id"].astype("int64")
+            df["city_slug"] = city_slug
+            rows.append(df[["city_slug", "listing_id", "latitude", "longitude"]])
+        except Exception as exc:
+            LOGGER.warning("Could not load coordinates from %s: %s", listings_path, exc)
+
+    if not rows:
+        return pd.DataFrame(columns=["city_slug", "listing_id", "latitude", "longitude"])
+
+    return pd.concat(rows, ignore_index=True).drop_duplicates(subset=["city_slug", "listing_id"])
+
+
+def load_sample(treated_ids: set[int]) -> tuple[pd.DataFrame, dict[str, Any]]:
     header = pd.read_csv(PANEL_PATH, nrows=0)
-    neighbourhood_col = "neighbourhood" if "neighbourhood" in header.columns else "neighbourhood_cleansed"
+
+    has_coords_in_panel = {"latitude", "longitude"}.issubset(set(header.columns))
 
     usecols = [
         "city_slug",
-        neighbourhood_col,
         "listing_id",
         "date",
         "log_price",
@@ -38,12 +86,13 @@ def header_and_cols() -> tuple[str, list[str], dict[str, str]]:
         "post_cutoff",
         "price_volatility_7d",
         "price_volatility_14d",
+        "latitude",
+        "longitude",
     ]
     usecols = [c for c in usecols if c in header.columns]
 
     dtype_map = {
         "city_slug": "string",
-        neighbourhood_col: "string",
         "listing_id": "int64",
         "log_price": "float32",
         "available": "float32",
@@ -53,86 +102,61 @@ def header_and_cols() -> tuple[str, list[str], dict[str, str]]:
         "post_cutoff": "float32",
         "price_volatility_7d": "float32",
         "price_volatility_14d": "float32",
+        "latitude": "float64",
+        "longitude": "float64",
     }
     dtype_use = {k: v for k, v in dtype_map.items() if k in usecols}
-    return neighbourhood_col, usecols, dtype_use
 
+    coords_map = None
+    if not has_coords_in_panel:
+        LOGGER.info("Coordinates not found in dynamic panel; loading from raw listings snapshots.")
+        coords_map = load_listing_coordinates()
 
-def get_treated_ids() -> set[int]:
-    breaks = pd.read_csv(BREAKS_PATH, usecols=["listing_id", "adopted"])
-    return set(breaks.loc[breaks["adopted"] == 1, "listing_id"].astype("int64").tolist())
-
-
-def build_group_aggregates(neighbourhood_col: str, usecols: list[str], dtype_use: dict[str, str]) -> pd.DataFrame:
-    parts: list[pd.DataFrame] = []
-    keys = ["city_slug", neighbourhood_col, "date"]
-
-    for chunk in pd.read_csv(PANEL_PATH, usecols=usecols, dtype=dtype_use, parse_dates=["date"], chunksize=500_000):
-        chunk["city_slug"] = chunk["city_slug"].fillna("UNKNOWN")
-        chunk[neighbourhood_col] = chunk[neighbourhood_col].fillna("UNKNOWN")
-        chunk["available"] = pd.to_numeric(chunk["available"], errors="coerce").fillna(0.0)
-        chunk["dynamic_algo_adopted"] = pd.to_numeric(chunk["dynamic_algo_adopted"], errors="coerce").fillna(0.0)
-        chunk["active"] = (chunk["available"] > 0).astype("int8")
-        chunk["adopt_active"] = (chunk["dynamic_algo_adopted"] * chunk["active"]).astype("float32")
-
-        grp = (
-            chunk.groupby(keys, observed=True)
-            .agg(group_adopt_active_sum=("adopt_active", "sum"), group_active_count=("active", "sum"))
-            .reset_index()
-        )
-        parts.append(grp)
-
-    agg = (
-        pd.concat(parts, ignore_index=True)
-        .groupby(keys, observed=True, as_index=False)[["group_adopt_active_sum", "group_active_count"]]
-        .sum()
-    )
-    return agg
-
-
-def build_sample_with_penetration(
-    neighbourhood_col: str,
-    usecols: list[str],
-    dtype_use: dict[str, str],
-    agg: pd.DataFrame,
-    treated_ids: set[int],
-) -> tuple[pd.DataFrame, dict]:
-    keys = ["city_slug", neighbourhood_col, "date"]
-    sampled_chunks: list[pd.DataFrame] = []
-
+    chunks: list[pd.DataFrame] = []
     n_rows_in = 0
     n_rows_kept = 0
 
-    for chunk in pd.read_csv(PANEL_PATH, usecols=usecols, dtype=dtype_use, parse_dates=["date"], chunksize=500_000):
+    for chunk in pd.read_csv(PANEL_PATH, usecols=usecols, dtype=dtype_use, parse_dates=["date"], chunksize=450_000):
         n_rows_in += len(chunk)
-        chunk["city_slug"] = chunk["city_slug"].fillna("UNKNOWN")
-        chunk[neighbourhood_col] = chunk[neighbourhood_col].fillna("UNKNOWN")
-        chunk["available"] = pd.to_numeric(chunk["available"], errors="coerce").fillna(0.0)
-        chunk["dynamic_algo_adopted"] = pd.to_numeric(chunk["dynamic_algo_adopted"], errors="coerce").fillna(0.0)
-        chunk["active"] = (chunk["available"] > 0).astype("int8")
-        chunk["adopt_active"] = (chunk["dynamic_algo_adopted"] * chunk["active"]).astype("float32")
-
-        chunk = chunk.merge(agg, on=keys, how="left")
-        chunk["group_adopt_active_sum"] = chunk["group_adopt_active_sum"].fillna(0.0)
-        chunk["group_active_count"] = chunk["group_active_count"].fillna(0.0)
-
-        peer_num = chunk["group_adopt_active_sum"] - chunk["adopt_active"]
-        peer_den = chunk["group_active_count"] - chunk["active"]
-        chunk["neighborhood_algo_penetration"] = np.where(peer_den > 0, peer_num / peer_den, np.nan)
-        chunk["neighborhood_algo_penetration"] = chunk["neighborhood_algo_penetration"].astype("float32").fillna(0.0)
-        chunk["adoption_x_penetration"] = (chunk["dynamic_algo_adopted"] * chunk["neighborhood_algo_penetration"]).astype("float32")
-
         keep = chunk["listing_id"].isin(treated_ids) | ((chunk["listing_id"] % CONTROL_SAMPLE_MOD) == 0)
-        kept = chunk.loc[keep].copy()
-        if kept.empty:
+        chunk = chunk.loc[keep].copy()
+        if chunk.empty:
             continue
-        sampled_chunks.append(kept)
-        n_rows_kept += len(kept)
 
-    if not sampled_chunks:
+        if coords_map is not None and not coords_map.empty:
+            chunk = chunk.merge(coords_map, on=["city_slug", "listing_id"], how="left", suffixes=("", "_raw"))
+            if "latitude_raw" in chunk.columns:
+                chunk["latitude"] = pd.to_numeric(chunk.get("latitude"), errors="coerce")
+                chunk["latitude"] = chunk["latitude"].fillna(pd.to_numeric(chunk["latitude_raw"], errors="coerce"))
+                chunk = chunk.drop(columns=["latitude_raw"])
+            if "longitude_raw" in chunk.columns:
+                chunk["longitude"] = pd.to_numeric(chunk.get("longitude"), errors="coerce")
+                chunk["longitude"] = chunk["longitude"].fillna(pd.to_numeric(chunk["longitude_raw"], errors="coerce"))
+                chunk = chunk.drop(columns=["longitude_raw"])
+
+        chunks.append(chunk)
+        n_rows_kept += len(chunk)
+
+    if not chunks:
         raise RuntimeError("No sampled rows for spillover TWFE.")
 
-    df = pd.concat(sampled_chunks, ignore_index=True)
+    df = pd.concat(chunks, ignore_index=True)
+
+    for col in [
+        "log_price",
+        "available",
+        "dynamic_algo_adopted",
+        "minimum_nights",
+        "maximum_nights",
+        "post_cutoff",
+        "price_volatility_7d",
+        "price_volatility_14d",
+        "latitude",
+        "longitude",
+    ]:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors="coerce")
+
     sample_meta = {
         "control_sample_mod": CONTROL_SAMPLE_MOD,
         "treated_listings_retained_all": True,
@@ -140,31 +164,161 @@ def build_sample_with_penetration(
         "rows_kept_after_sampling": int(n_rows_kept),
         "sampling_share_rows": float(n_rows_kept / n_rows_in) if n_rows_in else np.nan,
         "n_treated_listings": int(len(treated_ids)),
+        "radius_km": RADIUS_KM,
+        "distance_method": "BallTree(haversine)",
+        "coords_available_share": float(df[["latitude", "longitude"]].notna().all(axis=1).mean())
+        if {"latitude", "longitude"}.issubset(df.columns)
+        else 0.0,
     }
     return df, sample_meta
 
 
+def compute_local_penetration(group: pd.DataFrame) -> pd.DataFrame:
+    g = group.copy()
+    if g.empty:
+        g["local_penetration_1km"] = np.nan
+        return g
+
+    if "latitude" not in g.columns or "longitude" not in g.columns:
+        g["local_penetration_1km"] = np.nan
+        return g
+
+    g["available"] = pd.to_numeric(g["available"], errors="coerce").fillna(0.0)
+    g["dynamic_algo_adopted"] = pd.to_numeric(g["dynamic_algo_adopted"], errors="coerce").fillna(0.0)
+
+    valid_coords = g[["latitude", "longitude"]].notna().all(axis=1)
+    active = (g["available"] > 0) & valid_coords
+
+    penetration = np.full(len(g), np.nan, dtype=float)
+
+    if active.sum() == 0 or valid_coords.sum() == 0:
+        g["local_penetration_1km"] = penetration
+        return g
+
+    active_df = g.loc[active, ["listing_id", "latitude", "longitude", "dynamic_algo_adopted"]].copy()
+    all_df = g.loc[valid_coords, ["listing_id", "latitude", "longitude"]].copy()
+
+    active_coords = np.radians(active_df[["latitude", "longitude"]].to_numpy(dtype=float))
+    all_coords = np.radians(all_df[["latitude", "longitude"]].to_numpy(dtype=float))
+
+    tree = BallTree(active_coords, metric="haversine")
+    radius = RADIUS_KM / EARTH_RADIUS_KM
+    neighbors = tree.query_radius(all_coords, r=radius, return_distance=False)
+
+    active_ids = active_df["listing_id"].to_numpy()
+    active_adopt = active_df["dynamic_algo_adopted"].to_numpy(dtype=float)
+    query_ids = all_df["listing_id"].to_numpy()
+
+    local_vals = np.full(len(all_df), np.nan, dtype=float)
+    for i, neigh_idx in enumerate(neighbors):
+        if neigh_idx.size == 0:
+            continue
+
+        # Exclude self by listing_id.
+        keep_idx = neigh_idx[active_ids[neigh_idx] != query_ids[i]]
+        if keep_idx.size == 0:
+            continue
+
+        local_vals[i] = float(np.nanmean(active_adopt[keep_idx]))
+
+    valid_pos = np.flatnonzero(valid_coords.to_numpy())
+    penetration[valid_pos] = local_vals
+
+    g["local_penetration_1km"] = penetration
+    return g
+
+
+def add_localized_penetration(df: pd.DataFrame) -> pd.DataFrame:
+    LOGGER.info("Computing 1km localized penetration with BallTree(haversine).")
+
+    out_parts: list[pd.DataFrame] = []
+    grouped = df.groupby(["city_slug", "date"], observed=True, sort=False)
+
+    for idx, (_, gp) in enumerate(grouped, start=1):
+        try:
+            out_gp = compute_local_penetration(gp)
+            out_parts.append(out_gp)
+        except Exception as exc:
+            LOGGER.warning("Penetration failed for one city-date group; filling NaN. Error: %s", exc)
+            gp = gp.copy()
+            gp["local_penetration_1km"] = np.nan
+            out_parts.append(gp)
+
+        if idx % 150 == 0:
+            LOGGER.info("Penetration progress: %s city-date groups processed.", f"{idx:,}")
+
+    out = pd.concat(out_parts, ignore_index=True)
+    out[SPILLOVER_PEN_TERM] = pd.to_numeric(out["local_penetration_1km"], errors="coerce").fillna(0.0).astype("float32")
+    out[SPILLOVER_INTERACTION_TERM] = (
+        pd.to_numeric(out[SPILLOVER_OWN_TERM], errors="coerce").fillna(0.0) * out[SPILLOVER_PEN_TERM]
+    ).astype("float32")
+    return out
+
+
 def choose_controls(df: pd.DataFrame) -> list[str]:
-    candidates = ["available", "minimum_nights", "maximum_nights", "post_cutoff", "price_volatility_7d", "price_volatility_14d"]
+    # NOTE: post_cutoff is excluded to avoid absorbing own-adoption/spillover terms
+    # once listing/date FE are included.
+    candidates = ["available", "minimum_nights", "maximum_nights", "price_volatility_7d", "price_volatility_14d"]
     return [c for c in candidates if c in df.columns and df[c].notna().any()]
 
 
-def fit_model(df: pd.DataFrame, controls: list[str]) -> tuple[pd.DataFrame, dict]:
+def ensure_required_terms(
+    out: pd.DataFrame,
+    required_terms: list[str],
+    *,
+    nobs: float,
+    n_entities: int,
+    n_dates: int,
+) -> pd.DataFrame:
+    out = out.copy()
+    if "term_status" not in out.columns:
+        out["term_status"] = "estimated"
+
+    existing = set(out["term"].astype(str))
+    missing = [t for t in required_terms if t not in existing]
+    if not missing:
+        return out
+
+    fill_rows = []
+    for term in missing:
+        fill_rows.append(
+            {
+                "term": term,
+                "coef": np.nan,
+                "std_error": np.nan,
+                "t_stat": np.nan,
+                "p_value": np.nan,
+                "ci_low": np.nan,
+                "ci_high": np.nan,
+                "nobs": float(nobs),
+                "n_entities": int(n_entities),
+                "n_dates": int(n_dates),
+                "estimator": "linearmodels.PanelOLS",
+                "covariance": "clustered_by_listing",
+                "term_status": "absorbed_or_dropped",
+            }
+        )
+
+    LOGGER.warning("Spillover required terms missing: %s", ", ".join(missing))
+    return pd.concat([out, pd.DataFrame(fill_rows)], ignore_index=True)
+
+
+def fit_model(df: pd.DataFrame, controls: list[str]) -> tuple[pd.DataFrame, dict[str, Any]]:
     from linearmodels.panel import PanelOLS
 
-    df = df.dropna(subset=["listing_id", "date", "log_price", "dynamic_algo_adopted"]).copy()
+    model_df = df.dropna(subset=["listing_id", "date", "log_price", "dynamic_algo_adopted"]).copy()
 
     for c in controls:
-        med_listing = df.groupby("listing_id")[c].transform("median")
-        df[c] = pd.to_numeric(df[c], errors="coerce").fillna(med_listing)
-        med = df[c].median()
+        med_listing = model_df.groupby("listing_id", observed=True)[c].transform("median")
+        model_df[c] = pd.to_numeric(model_df[c], errors="coerce").fillna(med_listing)
+        med = model_df[c].median()
         if pd.isna(med):
             med = 0.0
-        df[c] = df[c].fillna(med)
+        model_df[c] = model_df[c].fillna(med)
 
-    exog_cols = ["dynamic_algo_adopted", "neighborhood_algo_penetration", "adoption_x_penetration"] + controls
+    exog_cols = [SPILLOVER_OWN_TERM, SPILLOVER_PEN_TERM, SPILLOVER_INTERACTION_TERM] + controls
 
-    panel = df.set_index(["listing_id", "date"]).sort_index()
+    panel = model_df.set_index(["listing_id", "date"]).sort_index()
     y = panel["log_price"].astype(float)
     X = panel[exog_cols].astype(float)
 
@@ -183,11 +337,24 @@ def fit_model(df: pd.DataFrame, controls: list[str]) -> tuple[pd.DataFrame, dict
             "ci_high": ci.iloc[:, 1].values,
         }
     )
-    out["nobs"] = float(res.nobs)
-    out["n_entities"] = int(panel.index.get_level_values(0).nunique())
-    out["n_dates"] = int(panel.index.get_level_values(1).nunique())
+    nobs = float(res.nobs)
+    n_entities = int(panel.index.get_level_values(0).nunique())
+    n_dates = int(panel.index.get_level_values(1).nunique())
+
+    out["nobs"] = nobs
+    out["n_entities"] = n_entities
+    out["n_dates"] = n_dates
     out["estimator"] = "linearmodels.PanelOLS"
     out["covariance"] = "clustered_by_listing"
+    out["term_status"] = "estimated"
+
+    out = ensure_required_terms(
+        out,
+        [SPILLOVER_OWN_TERM, SPILLOVER_PEN_TERM, SPILLOVER_INTERACTION_TERM],
+        nobs=nobs,
+        n_entities=n_entities,
+        n_dates=n_dates,
+    )
 
     summary = {
         "estimator": "linearmodels.PanelOLS",
@@ -196,26 +363,37 @@ def fit_model(df: pd.DataFrame, controls: list[str]) -> tuple[pd.DataFrame, dict
         "n_dates": int(panel.index.get_level_values(1).nunique()),
         "controls_used": controls,
         "rsquared_within": float(getattr(res, "rsquared_within", np.nan)),
+        "radius_km": RADIUS_KM,
+        "distance_method": "BallTree(haversine)",
     }
     return out, summary
 
 
-def write_penetration_summary(df: pd.DataFrame, neighbourhood_col: str) -> None:
+def write_penetration_summary(df: pd.DataFrame) -> None:
     summary = (
-        df.groupby(["city_slug", neighbourhood_col], observed=True)["neighborhood_algo_penetration"]
+        df.groupby(["city_slug"], observed=True)[SPILLOVER_PEN_TERM]
         .agg(["mean", "median", "std", "count"])
         .reset_index()
-        .rename(columns={"mean": "penetration_mean", "median": "penetration_median", "std": "penetration_std", "count": "n_obs"})
+        .rename(
+            columns={
+                "mean": f"{SPILLOVER_PEN_TERM}_mean",
+                "median": f"{SPILLOVER_PEN_TERM}_median",
+                "std": f"{SPILLOVER_PEN_TERM}_std",
+                "count": "n_obs",
+            }
+        )
     )
     summary.to_csv(PEN_SUMMARY_CSV, index=False)
 
 
-def write_markdown(results: pd.DataFrame, summary: dict) -> None:
+def write_markdown(results: pd.DataFrame, summary: dict[str, Any]) -> None:
     def fmt_term(term: str) -> str:
         row = results.loc[results["term"] == term]
         if row.empty:
             return f"- `{term}` dropped/absorbed."
         r = row.iloc[0]
+        if pd.isna(r.get("coef")):
+            return f"- `{term}` dropped/absorbed."
         return (
             f"- `{term}`: coef = {r['coef']:.6f}, SE = {r['std_error']:.6f}, "
             f"p = {r['p_value']:.4g}, 95% CI [{r['ci_low']:.6f}, {r['ci_high']:.6f}]"
@@ -230,6 +408,7 @@ def write_markdown(results: pd.DataFrame, summary: dict) -> None:
         f"- Listings (entities): **{summary['n_entities']:,}**",
         f"- Dates: **{summary['n_dates']:,}**",
         f"- Controls: {', '.join(summary['controls_used']) if summary['controls_used'] else '(none)'}",
+        f"- Local spillover radius: **{summary.get('radius_km', RADIUS_KM)} km** ({summary.get('distance_method', 'BallTree(haversine)')})",
         (
             "- Sampling: kept all treated listings and 1/"
             + str(sampling.get("control_sample_mod", "NA"))
@@ -239,25 +418,37 @@ def write_markdown(results: pd.DataFrame, summary: dict) -> None:
             else "- Sampling: none"
         ),
         "",
-        fmt_term("dynamic_algo_adopted"),
-        fmt_term("neighborhood_algo_penetration"),
-        fmt_term("adoption_x_penetration"),
+        fmt_term(SPILLOVER_OWN_TERM),
+        fmt_term(SPILLOVER_PEN_TERM),
+        fmt_term(SPILLOVER_INTERACTION_TERM),
         "",
-        "Specification: `log_price ~ own adoption + neighborhood penetration + interaction + controls + listing FE + date FE`, clustered by listing.",
+        f"Specification: `log_price ~ {SPILLOVER_OWN_TERM} + {SPILLOVER_PEN_TERM} + {SPILLOVER_INTERACTION_TERM} + controls + listing FE + date FE`, clustered by listing.",
     ]
     RESULTS_MD.write_text("\n".join(md) + "\n")
 
 
 def main() -> None:
-    neighbourhood_col, usecols, dtype_use = header_and_cols()
-    treated_ids = get_treated_ids()
-    agg = build_group_aggregates(neighbourhood_col, usecols, dtype_use)
+    configure_logging()
 
-    df, sample_meta = build_sample_with_penetration(neighbourhood_col, usecols, dtype_use, agg, treated_ids)
-    write_penetration_summary(df, neighbourhood_col)
+    treated_ids = get_treated_ids()
+    df, sample_meta = load_sample(treated_ids=treated_ids)
+
+    try:
+        df = add_localized_penetration(df)
+    except Exception as exc:
+        LOGGER.exception("Localized penetration computation failed: %s", exc)
+        raise
+
+    write_penetration_summary(df)
 
     controls = choose_controls(df)
-    results, summary = fit_model(df, controls)
+
+    try:
+        results, summary = fit_model(df, controls)
+    except Exception as exc:
+        LOGGER.exception("Spillover PanelOLS failed: %s", exc)
+        raise
+
     summary["sampling"] = sample_meta
 
     results.to_csv(RESULTS_CSV, index=False)

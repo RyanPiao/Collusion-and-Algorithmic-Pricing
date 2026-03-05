@@ -1,25 +1,64 @@
 {
-  "estimator": "linearmodels.PanelOLS",
-  "fallback_used": false,
-  "controls_used": [
-    "available",
-    "minimum_nights",
-    "maximum_nights",
-    "post_cutoff",
-    "price_volatility_7d",
-    "price_volatility_14d"
+  "levels": {
+    "dependent_var": "log_price",
+    "estimator": "linearmodels.PanelOLS",
+    "fallback_used": false,
+    "controls_used": [
+      "available",
+      "minimum_nights",
+      "maximum_nights",
+      "price_volatility_7d"
+    ],
+    "nobs": 4236416.0,
+    "n_entities": 18721,
+    "n_dates": 184,
+    "rsquared_within": -4.278451561390284e-05,
+    "rsquared_overall": 3.0582586839633663e-06
+  },
+  "volatility_models": [
+    {
+      "dependent_var": "abs_price_change",
+      "estimator": "linearmodels.PanelOLS",
+      "fallback_used": false,
+      "controls_used": [
+        "available",
+        "minimum_nights",
+        "maximum_nights",
+        "price_volatility_7d"
+      ],
+      "nobs": 4236416.0,
+      "n_entities": 18721,
+      "n_dates": 184,
+      "rsquared_within": -2.24595044784337e-07,
+      "rsquared_overall": 9.405800681983045e-06
+    },
+    {
+      "dependent_var": "rolling_7d_variance",
+      "estimator": "linearmodels.PanelOLS",
+      "fallback_used": false,
+      "controls_used": [
+        "available",
+        "minimum_nights",
+        "maximum_nights",
+        "price_volatility_7d"
+      ],
+      "nobs": 4236416.0,
+      "n_entities": 18721,
+      "n_dates": 184,
+      "rsquared_within": 0.7908178442873163,
+      "rsquared_overall": 0.7869035851537882
+    }
   ],
-  "nobs": 247664.0,
-  "n_entities": 1346,
-  "n_dates": 184,
-  "rsquared_within": 0.11524378610462227,
-  "rsquared_overall": -30.42065639863937,
   "sampling": {
     "control_sample_mod": 100,
     "treated_listings_retained_all": true,
-    "rows_input_total": 24228568,
-    "rows_kept_after_sampling": 247664,
-    "sampling_share_rows": 0.01022198257858244,
-    "n_treated_listings": 19
+    "rows_input_total": 27452432,
+    "rows_kept_after_sampling": 4236416,
+    "sampling_share_rows": 0.1543184224989611,
+    "n_treated_listings": 17580
+  },
+  "files": {
+    "levels_csv": "/Users/openclaw/.openclaw/workspace/projects/Collusion-and-Algorithmic-Pricing/data/processed/panel_extension/twfe_results_levels.csv",
+    "volatility_csv": "/Users/openclaw/.openclaw/workspace/projects/Collusion-and-Algorithmic-Pricing/data/processed/panel_extension/twfe_results_volatility.csv"
   }
 }

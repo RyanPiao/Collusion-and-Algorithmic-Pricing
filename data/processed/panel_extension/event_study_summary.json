@@ -1,13 +1,13 @@
 {
   "estimator": "linearmodels.PanelOLS",
-  "nobs": 245274.0,
-  "n_treated_listings": 19,
+  "trend_adjustment": "listing-specific linear trends (FWL detrending before PanelOLS)",
+  "nobs": 1493022.0,
+  "n_treated_listings": 17580,
   "n_dates": 184,
   "controls_used": [
     "available",
     "minimum_nights",
     "maximum_nights",
-    "post_cutoff",
     "price_volatility_7d",
     "price_volatility_14d"
   ],
@@ -16,14 +16,19 @@
     30
   ],
   "reference_period": -1,
-  "n_event_coefficients": 59,
-  "rsquared_within": 0.19752148113951828,
+  "n_event_coefficients_full_window": 61,
+  "n_event_coefficients_estimated": 58,
+  "n_event_coefficients_absorbed_or_dropped": 2,
+  "rsquared_within": 5.702087903325381e-05,
+  "mean_pre_period_coef": -0.002178871807141819,
+  "mean_post_period_coef": -0.0007421426333746235,
+  "share_pre_period_p_lt_0_05": 0.0,
   "sampling": {
     "control_sample_mod": 100,
     "treated_listings_retained_all": true,
-    "rows_input_total": 24228568,
-    "rows_kept_after_sampling": 245274,
-    "sampling_share_rows": 0.010123338696698873,
-    "n_treated_listings": 19
+    "rows_input_total": 27452432,
+    "rows_kept_after_sampling": 1493022,
+    "sampling_share_rows": 0.05438578265124197,
+    "n_treated_listings": 17580
   }
 }

@@ -1,23 +1,27 @@
 {
   "estimator": "linearmodels.PanelOLS",
-  "nobs": 247664.0,
-  "n_entities": 1346,
+  "nobs": 4236416.0,
+  "n_entities": 18721,
   "n_dates": 184,
   "controls_used": [
     "available",
     "minimum_nights",
     "maximum_nights",
-    "post_cutoff",
     "price_volatility_7d",
     "price_volatility_14d"
   ],
-  "rsquared_within": 0.12105174914177763,
+  "rsquared_within": 1.5225899871462723e-05,
+  "radius_km": 1.0,
+  "distance_method": "BallTree(haversine)",
   "sampling": {
     "control_sample_mod": 100,
     "treated_listings_retained_all": true,
-    "rows_input_total": 24228568,
-    "rows_kept_after_sampling": 247664,
-    "sampling_share_rows": 0.01022198257858244,
-    "n_treated_listings": 19
+    "rows_input_total": 27452432,
+    "rows_kept_after_sampling": 4236416,
+    "sampling_share_rows": 0.1543184224989611,
+    "n_treated_listings": 17580,
+    "radius_km": 1.0,
+    "distance_method": "BallTree(haversine)",
+    "coords_available_share": 1.0
   }
 }
