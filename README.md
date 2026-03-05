@@ -1,207 +1,93 @@
-# Algorithmic Pricing, Market Conduct, and Antitrust Risk in Short-Term Rentals: A Fuzzy RDD Study of Airbnb Smart Pricing
+# Algorithmic Pricing, Market Conduct, and Antitrust Risk in U.S. Major Cities
 
-## Abstract
-This project studies whether platform-assisted algorithmic pricing is associated with discontinuous changes in Airbnb listing prices around Smart Pricing rollout timing. Using an eight-city daily panel (Austin, Boston, Chicago, Los Angeles, New York City, San Francisco, Seattle, Washington, DC), we implement a multicity fuzzy-RDD/IV design in which `post_cutoff` instruments listing-day availability (`available`) within local time windows.
+## About This Project
+This repository studies whether Airbnb Smart Pricing rollout timing is associated with local discontinuities in listing-level prices, and whether any effects are concentrated in latent high-propensity host segments.
 
-Current pooled estimates from `data/processed/day4/second_stage_pooled_window_estimates.csv` are economically small and statistically imprecise across all tested bandwidths: **0.0034** (SE 0.0265, ±1 month), **0.0033** (SE 0.0174, ±2 months), and **0.0027** (SE 0.0145, ±3 months), with 95% confidence intervals spanning zero in every case. First-stage relevance is strong in pooled samples (F-statistics 4,158 to 13,906), and placebo/bandwidth checks do not reveal stable alternative discontinuities. The current evidence therefore supports a cautious baseline conclusion: no robust large immediate level shift in prices is detected in this proxy implementation, while mechanism-oriented coordination risks require separate dynamic tests.
+The project combines:
+- a multicity fuzzy RDD / IV baseline,
+- robustness and diagnostic checks,
+- an ML-econometrics heterogeneity extension,
+- panel/event-study follow-on analyses,
+- and a working-paper synthesis.
 
-## Motivation
-Algorithmic pricing systems can reduce search and adjustment costs, but they can also create synchronized responses to market signals across many sellers. That dual effect is central to modern antitrust debates in digital platforms. Airbnb offers a useful setting because Smart Pricing was introduced with clear timing and heterogeneous host adoption, enabling an empirical test of whether observed price changes are consistent with unilateral optimization or with behavior that could elevate coordination concerns.
+Primary paper draft:
+- `docs/working_paper_us_major_cities.md`
 
-## Research Question and Hypothesis
-### Research Question
-How does increased exposure to Airbnb Smart Pricing affect host nightly pricing behavior around the policy introduction window?
+---
 
-### Hypothesis
-- **H1 (primary):** Listings with higher post-cutoff Smart Pricing uptake propensity experience a statistically significant shift in nightly prices relative to comparable listings near the cutoff.
-- **H2 (competition-policy interpretation):** If the estimated effect indicates tighter price movement and reduced independent variation among exposed listings, this pattern is more consistent with elevated coordination risk than with purely idiosyncratic host-level pricing.
+## Final Empirical Readout (Current)
+Based on the working paper and latest repository outputs:
 
-## Identification Strategy (Summary)
-The core design uses **announcement-date policy timing** with a **fuzzy RDD** implementation.
+1. **Average market effect (baseline Day 4):**
+   pooled second-stage coefficients are near zero and statistically imprecise across ±1m / ±2m / ±3m windows.
+2. **First stage:**
+   pooled instrument relevance is strong in baseline proxy specifications.
+3. **Diagnostics:**
+   bandwidth and placebo checks do not reveal a stable, robust alternative discontinuity.
+4. **Heterogeneity extension:**
+   refined pre-cutoff latent propensity modeling identifies strong cross-sectional heterogeneity signals, but does not overturn the baseline near-null average discontinuity result.
+5. **Interpretation discipline:**
+   findings are consistent with heterogeneity in levels/responsiveness rather than a large immediate pooled price-level break at cutoff.
 
-1. **Cutoff and running variable**
-   - Main cutoff anchored to Smart Pricing rollout timing (early-access marker: `2023-03-25`; public availability marker tracked in diagnostics: `2023-05-25`).
-   - Running variable: days relative to the cutoff (`days_from_cutoff` / date index).
+---
 
-2. **Eligibility and fuzzy assignment**
-   - Eligibility proxy at listing-night level: `available == 1`.
-   - Post-cutoff assignment indicator captures policy exposure timing.
-   - Treatment is fuzzy (not all eligible hosts adopt immediately; some non-eligible observations have low exposure), so first-stage uptake is modeled rather than imposed.
+## Critical Data Limitation (Explicit)
+Inside Airbnb is built from **periodic forward-calendar scrapes** (e.g., monthly/quarterly). Therefore, the constructed “daily panel” reflects scheduled prices visible at scrape time, not continuous real-time day-to-day edits between scrapes.
 
-3. **First stage (uptake propensity)**
-   - Smart Pricing uptake propensity is estimated from host-side observables (e.g., tenure, acceptance/response patterns, superhost status, listing portfolio, booking settings) and selected controls.
-   - This generates a continuous adoption-intensity measure used in the second stage.
+Accordingly, volatility findings should be interpreted as evidence of **differentiated forward price scheduling** (calendar complexity), not definitive proof of continuous within-interval dynamic repricing.
 
-4. **Second stage (local price effect)**
-   - Nightly price is regressed on predicted Smart Pricing exposure within bandwidth around the cutoff.
-   - Robust inference and specification diagnostics are included (bandwidth sensitivity, multicollinearity checks, heteroskedasticity test, RESET, residual normality checks).
+(See Section 7 in `docs/working_paper_us_major_cities.md`.)
+
+---
 
 ## Repository Structure
 ```text
 .
 ├── README.md
-├── Step_1_Data_Cleaning.ipynb
-├── calendar_data_cleaning.ipynb
-├── Step_2_Data_Clustering.ipynb
-├── fuzzy_rdd_boston.ipynb
+├── docs/
+│   ├── working_paper_us_major_cities.md
+│   ├── ml_extension_results.md
+│   ├── DAY*_STATUS.md, WEEK2_*.md, and interpretation notes
 ├── scripts/
 │   ├── day2_build_multicity_panels.py
 │   ├── day3_multicity_eda.py
-│   └── day4_multicity_fuzzy_rdd.py
-├── day3_multicity_eda.ipynb
-├── data/
-│   ├── processed/day2/ ... (generated Day 2 outputs)
-│   ├── processed/day3/ ... (generated Day 3 EDA outputs)
-│   └── processed/day4/ ... (generated Day 4 baseline IV outputs)
-└── docs/
-    ├── DAY1_IDENTIFICATION.md
-    ├── DAY1_ROADMAP.md
-    ├── DAY1_STATUS.md
-    ├── DAY1_identification_design.md
-    ├── DAY1_next_steps.md
-    ├── DAY1_problem_framing.md
-    ├── DAY2_multicity_data_design.md
-    └── DAY2_STATUS.md
+│   ├── day4_multicity_fuzzy_rdd.py
+│   ├── ml_unsupervised_extension.py
+│   ├── ml_extension_psm_did.py
+│   └── panel_extension_*.py
+└── data/processed/
+    ├── day2/
+    ├── day3/
+    ├── day4/
+    ├── ml_extension/
+    └── panel_extension/
 ```
 
-## Notebook Map
-- **`Step_1_Data_Cleaning.ipynb`**  
-  Ingestion and standardization of InsideAirbnb source files, city-level cleaning routines, and merged panel exports used downstream.
+---
 
-- **`calendar_data_cleaning.ipynb`**  
-  Calendar-focused preprocessing pipeline, including weekly filtering/merging and preparation of analysis-ready calendar-listing joins.
+## Reproducibility (Core)
+Create environment and run core pipeline:
 
-- **`Step_2_Data_Clustering.ipynb`**  
-  Intermediate aggregation/clustering workflow used to organize listings and construct grouped analysis inputs.
-
-- **`fuzzy_rdd_boston.ipynb`**  
-  Main empirical notebook: merge, feature engineering, cutoff construction, fuzzy RDD estimation, and robustness/diagnostic tests.
-
-- **`day3_multicity_eda.ipynb`**  
-  Day 3 descriptive notebook for multicity cutoff-window EDA: city trends, pre/post distribution shifts, support diagnostics, and missingness/data-quality views.
-
-## Day 1 Status
-Completed foundation work includes:
-- Data ingestion and cleaning notebooks consolidated in the repository.
-- Listing-calendar merge and core variable preparation implemented.
-- Policy timing markers and fuzzy RDD skeleton operationalized in the Boston analysis notebook.
-- First-pass diagnostics and robustness scaffolding added (bandwidth sensitivity and specification tests).
-
-Detailed notes:
-- [`docs/DAY1_STATUS.md`](docs/DAY1_STATUS.md)
-- [`docs/DAY1_IDENTIFICATION.md`](docs/DAY1_IDENTIFICATION.md)
-- [`docs/DAY1_problem_framing.md`](docs/DAY1_problem_framing.md)
-- [`docs/DAY1_identification_design.md`](docs/DAY1_identification_design.md)
-
-## Day 2 Multi-City Status
-- Day 2 pipeline executed via `scripts/day2_build_multicity_panels.py`.
-- Produced the primary daily panel (`fact_listing_day_multicity`) and secondary monthly panel (`agg_city_month_multicity`).
-- Exported ±1m/±2m/±3m windowed extracts and QA outputs under `data/processed/day2/qa/`.
-- Requested Miami market was unavailable in current source endpoints; Washington DC was used as the approved alternate (logged in `city_selection_audit.csv`).
-- City-specific Smart Pricing rollout dates were not credibly observed from source files; pipeline falls back to auditable pooled cutoffs in `city_cutoff_map.csv`.
-- Full execution summary and QA highlights: [`docs/DAY2_STATUS.md`](docs/DAY2_STATUS.md).
-
-## Planned Day 2+ Roadmap
-1. Finalize treatment coding decisions and document any alternative cutoff/event-window definitions.
-2. Tighten first-stage feature set and report first-stage strength/fit statistics transparently.
-3. Produce baseline and robustness tables (multiple bandwidths, placebo cutoffs, heterogeneity splits).
-4. Add inference-ready outputs (tables/figures) and reproducibility notes for full reruns.
-5. Extend beyond single-city validation to multi-city comparisons where data consistency is adequate.
-
-Roadmap details:
-- [`docs/DAY1_ROADMAP.md`](docs/DAY1_ROADMAP.md)
-- [`docs/DAY1_next_steps.md`](docs/DAY1_next_steps.md)
-- [`docs/DAY2_multicity_data_design.md`](docs/DAY2_multicity_data_design.md)
-
-## Day 2 Multi-City Build
-
-Day 2 extends the Boston-focused setup into an 8-city multicity panel with explicit cutoff mapping, daily identification windows, and monthly robustness aggregates.
-
-### What was added
-- **Primary dataset:** `fact_listing_day_multicity` (daily listing-level panel).
-- **Secondary dataset:** `agg_city_month_multicity` (city-month robustness panel).
-- **Window extracts:** ±1, ±2, and ±3 month datasets around the assigned city cutoff.
-- **QA outputs:** city-date coverage, missingness reports, support near cutoff, first-stage prep tables, and consistency checks.
-
-### Cutoff policy for Day 2
-- Pipeline supports city-specific cutoff overrides when credible dates are available.
-- Where city-specific rollout dates are not available, Day 2 uses a pooled fallback cutoff and records this decision in `city_cutoff_map` with source metadata.
-
-### Data-frequency rationale
-- **Daily (primary):** needed for local identification around cutoff timing in fuzzy-RDD style designs.
-- **Monthly (secondary):** used as a robustness and communication layer to validate that directional patterns are not artifacts of high-frequency noise.
-
-## Day 3 Multi-City EDA Around Cutoff
-
-Day 3 adds policy-oriented descriptive outputs on top of Day 2 multicity panels.
-
-### Day 3 outputs
-- **EDA script:** `scripts/day3_multicity_eda.py`
-- **EDA notebook:** `day3_multicity_eda.ipynb`
-- **Trend aggregates:** `data/processed/day3/city_day_trends_cutoff.csv`
-- **Distribution shifts:**
-  - `data/processed/day3/prepost_distribution_stats_city_window.csv`
-  - `data/processed/day3/prepost_distribution_shift_summary.csv`
-- **Treatment-support diagnostics:** `data/processed/day3/treatment_support_diagnostics_city_window.csv`
-- **Missingness/data quality:**
-  - `data/processed/day3/missingness_summary_city.csv`
-  - `data/processed/day3/data_quality_checks_summary.csv`
-- **Figures:**
-  - `docs/figures/day3/city_trend_mean_price_cutoff.png`
-  - `docs/figures/day3/prepost_logprice_distribution_bw1m.png`
-  - `docs/figures/day3/treatment_support_diagnostics.png`
-- **Interpretation note:** `docs/DAY3_eda_note.md`
-
-## Day 4 Multi-City Fuzzy RDD Baseline
-
-Day 4 adds a baseline multicity fuzzy-RDD/IV estimation layer aligned with the Day 1 design intent (local estimation around policy cutoff windows with explicit first-stage reporting).
-
-### Day 4 outputs
-- **Model script:** `scripts/day4_multicity_fuzzy_rdd.py`
-- **First-stage strength table:** `data/processed/day4/first_stage_strength_city_window.csv`
-- **Second-stage pooled estimates:** `data/processed/day4/second_stage_pooled_window_estimates.csv`
-- **Second-stage city-window estimates:** `data/processed/day4/second_stage_city_window_estimates.csv`
-- **Diagnostics:**
-  - `data/processed/day4/diagnostic_bandwidth_sensitivity_pooled.csv`
-  - `data/processed/day4/diagnostic_placebo_cutoff_pooled_bw3m.csv`
-- **Run summary:** `data/processed/day4/day4_run_summary.json`
-- **Interpretation note:** `docs/DAY4_interpretation_notes.md`
-
-### Headline Day 4 readout
-- Pooled first-stage relevance is strong across all windows (high F-statistics in ±1/±2/±3m).
-- Pooled second-stage local price-level effects are close to zero and statistically imprecise across bandwidths.
-- Placebo-cutoff checks do not show robust alternative breakpoints producing stable significant effects in this baseline setup.
-
-## ML-Econometrics Extension
-
-An additional unsupervised-learning layer constructs a **latent adoption propensity proxy** (not true adoption) using strictly pre-cutoff listing/host characteristics, then compares regression behavior against the baseline availability proxy.
-
-### Method summary
-- Input panel: `data/processed/day2/fact_listing_day_multicity_bw_3m.csv.gz`
-- Pre-cutoff feature build at listing level (`post_cutoff == 0` only) to prevent post-treatment leakage.
-- Preprocessing: `StandardScaler` for numeric features + `OneHotEncoder` for categoricals.
-- Unsupervised models: **KMeans** and **GaussianMixture (GMM)**.
-- Proxy construction: probability-weighted GMM cluster scores from pre-cutoff host/listing readiness signals.
-- Econometric comparison outputs:
-  - First-stage baseline: `available ~ post_cutoff + controls`
-  - First-stage ML: `latent_adoption_propensity_proxy ~ post_cutoff + controls`
-  - Second-stage baseline: `log_price ~ available + controls`
-  - Second-stage ML: `log_price ~ latent_adoption_propensity_proxy + controls`
-
-### Run
 ```bash
+python3 -m venv .venv
 source .venv/bin/activate
-python scripts/ml_unsupervised_extension.py --repo-root .
+pip install numpy pandas scikit-learn scipy statsmodels linearmodels matplotlib
+
+python scripts/day2_build_multicity_panels.py
+python scripts/day3_multicity_eda.py
+python scripts/day4_multicity_fuzzy_rdd.py
 ```
 
-### Extension outputs
-- `data/processed/ml_extension/listing_latent_proxy.csv`
-- `data/processed/ml_extension/listing_cluster_membership.csv`
-- `data/processed/ml_extension/first_stage_comparison.csv`
-- `data/processed/ml_extension/second_stage_comparison.csv`
-- `data/processed/ml_extension/run_summary.json`
+Run refined ML heterogeneity extension:
 
-### Notes
-- Design note: `docs/ml_extension_design.md`
-- Results note: `docs/ml_extension_results.md`
-- The latent proxy is intended for heterogeneity/proxy analysis and should not be interpreted as observed Smart Pricing adoption.
+```bash
+python scripts/ml_unsupervised_extension.py --repo-root .
+python scripts/ml_extension_psm_did.py --repo-root .
+```
+
+---
+
+## Scope and Claims
+- This repo is designed for transparent empirical workflow and policy-relevant diagnostics.
+- Latent proxy measures are **not** direct Smart Pricing adoption telemetry.
+- Results should be interpreted as quasi-experimental evidence under stated assumptions and known data-construction limits.
