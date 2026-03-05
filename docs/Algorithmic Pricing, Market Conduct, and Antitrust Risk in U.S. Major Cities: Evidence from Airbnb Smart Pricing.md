@@ -51,6 +51,6 @@ These findings support the "Cognitive Constraint" hypothesis: pricing algorithms
 **Module:** Omitted Variable Bias & Unsupervised Proxies in Applied Data
 **Discussion Prompt:** In this project, a naive Machine Learning regression found a massive positive correlation between algorithmic pricing and rent levels. However, a Two-Way Fixed Effects (TWFE) panel model proved the true causal effect on price *levels* was zero. 
 
-1. **For ECON 1116 (Principles of Microeconomics):** How does the "Cognitive Constraint" hypothesis explain why only sophisticated hosts see behavioral changes from the algorithm? Discuss the microeconomic mechanism of price discrimination observed here (increased volatility vs. flat levels).
+1. **For ECON 1116 (Principles of Microeconomics) / 2316 (Microeconomics Theory) :** How does the "Cognitive Constraint" hypothesis explain why only sophisticated hosts see behavioral changes from the algorithm? Discuss the microeconomic mechanism of price discrimination observed here (increased volatility vs. flat levels).
 2. **For ECON 5200 (Applied Data Analytics in Econ) / ECON 3916 (Statistical & Machine Learning):** How did the use of KMeans/GMM clustering on *strictly pre-cutoff* data prevent data leakage while solving the missing telemetry problem? 
 3. **Data Literacy:** The dataset is built on periodic scrapes of a forward-looking calendar. Why does this structural limitation fundamentally change how we must interpret the "daily price variance" coefficient?
