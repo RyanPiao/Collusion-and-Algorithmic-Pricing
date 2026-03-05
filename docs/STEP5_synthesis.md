@@ -1,8 +1,8 @@
-# Day 5 Synthesis: Findings, Limitations, and Next Steps
+# Step 5 Synthesis: Findings, Limitations, and Next Steps
 
 ## Executive Summary
 
-This week’s analysis implemented a **multicity fuzzy regression discontinuity design (RDD)** to estimate the local causal effect of Airbnb Smart Pricing exposure on nightly listing prices. Using listing‑day panels from multiple cities and a proxy treatment channel (`available`), we find:
+This stage’s analysis implemented a **multicity fuzzy regression discontinuity design (RDD)** to estimate the local causal effect of Airbnb Smart Pricing exposure on nightly listing prices. Using listing‑step panels from multiple cities and a proxy treatment channel (`available`), we find:
 
 - **First‑stage strength** is high in pooled samples (F > 4000 across bandwidths), confirming the cutoff is a strong predictor of the treatment proxy.
 - **Second‑stage estimates** are near zero and statistically insignificant across all bandwidths (±1m, ±2m, ±3m) and city‑specific windows.
@@ -12,15 +12,15 @@ These results do not rule out more subtle forms of algorithmic coordination (e.g
 
 ---
 
-## 1. Week‑at‑a‑Glance
+## 1. Stage‑at‑a‑Glance
 
-| Day | Focus | Key Outputs |
+| Step | Focus | Key Outputs |
 |-----|-------|-------------|
-| **Day 1** | Problem framing & identification design | Research question, fuzzy‑RDD design, estimand definition, roadmap |
-| **Day 2** | Multi‑city panel construction | City‑selection audit, cleaned listing‑day panels, feature engineering |
-| **Day 3** | Exploratory data analysis | Descriptive statistics, price distributions, temporal patterns, heterogeneity |
-| **Day 4** | Multicity fuzzy‑RDD baseline | First‑stage strength tables, second‑stage estimates, bandwidth diagnostics |
-| **Day 5** | **Synthesis & next‑step planning** | This memo |
+| **Step 1** | Problem framing & identification design | Research question, fuzzy‑RDD design, estimand definition, roadmap |
+| **Step 2** | Multi‑city panel construction | City‑selection audit, cleaned listing‑step panels, feature engineering |
+| **Step 3** | Exploratory data analysis | Descriptive statistics, price distributions, temporal patterns, heterogeneity |
+| **Step 4** | Multicity fuzzy‑RDD baseline | First‑stage strength tables, second‑stage estimates, bandwidth diagnostics |
+| **Step 5** | **Synthesis & next‑step planning** | This memo |
 
 ---
 
@@ -93,7 +93,7 @@ City‑specific estimates are generally imprecise; no city‑window estimate rea
 
 ## 5. Recommended Next Steps
 
-### 5.1 Immediate (Week 2)
+### 5.1 Immediate (Stage 2)
 1. **Cluster‑robust inference:** Re‑estimate models with host‑level or neighborhood‑level clustering to assess sensitivity of standard errors.
 2. **Pre‑trend & continuity diagnostics:** Formal McCrary density tests, covariate balance checks, and pre‑cutoff dynamic effects to strengthen design credibility.
 3. **Direct adoption proxy:** If available, incorporate host‑level features that more closely predict Smart‑Pricing uptake (e.g., superhost status, acceptance rate, response time).
@@ -113,14 +113,14 @@ City‑specific estimates are generally imprecise; no city‑window estimate rea
 ## 6. Reproducibility Status
 
 - **Data:** Raw InsideAirbnb snapheets are archived; cleaning and panel‑construction scripts are in `scripts/`.
-- **Analysis:** Day‑4 estimation scripts (`day4_multicity_fuzzy_rdd.py`) produce the core tables and diagnostics.
-- **Outputs:** All tables and figures are saved in `data/processed/day4/` with accompanying metadata.
-- **One‑command rerun:** A master script that chains Day‑2 through Day‑4 steps is not yet implemented; this is a priority for Week 2.
+- **Analysis:** Step‑4 estimation scripts (`day4_multicity_fuzzy_rdd.py`) produce the core tables and diagnostics.
+- **Outputs:** All tables and figures are saved in `data/processed/step4/` with accompanying metadata.
+- **One‑command rerun:** A master script that chains Step‑2 through Step‑4 steps is not yet implemented; this is a priority for Stage 2.
 
 ---
 
 ## 7. Closing Note
 
-This week’s work delivers a **credible baseline screening analysis** of Airbnb Smart Pricing’s local price effects. The near‑zero estimates should not be interpreted as “no effect” but as “no large immediate level effect detectable with the current proxy and design.” The project now stands ready for deeper robustness checks and a shift toward more nuanced competition‑policy metrics.
+This stage’s work delivers a **credible baseline screening analysis** of Airbnb Smart Pricing’s local price effects. The near‑zero estimates should not be interpreted as “no effect” but as “no large immediate level effect detectable with the current proxy and design.” The project now stands ready for deeper robustness checks and a shift toward more nuanced competition‑policy metrics.
 
-**Next handoff:** Week 2 will focus on cluster‑robust inference, pre‑trend diagnostics, and the first dispersion‑focused analyses.
+**Next handoff:** Stage 2 will focus on cluster‑robust inference, pre‑trend diagnostics, and the first dispersion‑focused analyses.

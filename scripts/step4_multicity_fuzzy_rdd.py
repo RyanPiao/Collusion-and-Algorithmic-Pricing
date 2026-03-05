@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
-"""Day 4 multicity baseline fuzzy-RDD modeling.
+"""Step 4 multicity baseline fuzzy-RDD modeling.
 
 Baseline implementation (scalable one-pass IV per sample):
-- Endogenous treatment proxy: listing-day availability (available)
+- Endogenous treatment proxy: listing-step availability (available)
 - Excluded instrument: post-cutoff indicator
 - Running-variable controls: local linear terms in days-from-cutoff
 - Additional listing/host controls and pooled city fixed effects
 
-Produces Day 4 required outputs under data/processed/day4/.
+Produces Step 4 required outputs under data/processed/step4/.
 """
 
 from __future__ import annotations
@@ -380,7 +380,7 @@ def run_placebo_pooled(window_file: Path, offsets_days: List[int], chunk_size: i
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Day 4 multicity fuzzy-RDD baseline")
+    p = argparse.ArgumentParser(description="Step 4 multicity fuzzy-RDD baseline")
     p.add_argument("--repo-root", type=str, default=".")
     p.add_argument("--chunk-size", type=int, default=500_000)
     return p.parse_args()
@@ -390,8 +390,8 @@ def main() -> int:
     args = parse_args()
     repo = Path(args.repo_root).resolve()
 
-    day2_proc = repo / "data" / "processed" / "day2"
-    day4_proc = repo / "data" / "processed" / "day4"
+    day2_proc = repo / "data" / "processed" / "step2"
+    day4_proc = repo / "data" / "processed" / "step4"
     _ensure_dirs([day4_proc])
 
     pooled_rows_all: List[Dict] = []
@@ -399,7 +399,7 @@ def main() -> int:
 
     for m in (1, 2, 3):
         window_file = day2_proc / f"fact_listing_day_multicity_bw_{m}m.csv.gz"
-        print(f"[Day4] Running baseline fuzzy-RDD for ±{m}m window...")
+        print(f"[Step4] Running baseline fuzzy-RDD for ±{m}m window...")
         pooled_rows, city_rows = run_window_models(window_file=window_file, window_months=m, chunk_size=args.chunk_size)
         pooled_rows_all.extend(pooled_rows)
         city_rows_all.extend(city_rows)
@@ -488,11 +488,11 @@ def main() -> int:
     placebo_out.to_csv(day4_proc / "diagnostic_placebo_cutoff_pooled_bw3m.csv", index=False)
 
     summary = {
-        "first_stage_table": "data/processed/day4/first_stage_strength_city_window.csv",
-        "second_stage_pooled": "data/processed/day4/second_stage_pooled_window_estimates.csv",
-        "second_stage_city": "data/processed/day4/second_stage_city_window_estimates.csv",
-        "diagnostic_bandwidth": "data/processed/day4/diagnostic_bandwidth_sensitivity_pooled.csv",
-        "diagnostic_placebo": "data/processed/day4/diagnostic_placebo_cutoff_pooled_bw3m.csv",
+        "first_stage_table": "data/processed/step4/first_stage_strength_city_window.csv",
+        "second_stage_pooled": "data/processed/step4/second_stage_pooled_window_estimates.csv",
+        "second_stage_city": "data/processed/step4/second_stage_city_window_estimates.csv",
+        "diagnostic_bandwidth": "data/processed/step4/diagnostic_bandwidth_sensitivity_pooled.csv",
+        "diagnostic_placebo": "data/processed/step4/diagnostic_placebo_cutoff_pooled_bw3m.csv",
         "pooled_window_rows": int(len(pooled_df)),
         "city_window_rows": int(len(city_df)),
     }

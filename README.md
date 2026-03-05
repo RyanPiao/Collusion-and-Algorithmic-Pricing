@@ -20,7 +20,7 @@ How does increased exposure to Airbnb Smart Pricing affect host nightly pricing 
 ## Identification Strategy (Summary)
 The core design uses **announcement-date policy timing** with a **fuzzy RDD** implementation, supplemented by **Machine Learning** and **Longitudinal Panel** methods.
 
-1. **Baseline Fuzzy RDD / IV:** Uses Smart Pricing rollout timing (`post_cutoff`) as an instrument for listing-day availability (`available`) to test for immediate, market-wide level shifts.
+1. **Baseline Fuzzy RDD / IV:** Uses Smart Pricing rollout timing (`post_cutoff`) as an instrument for listing-step availability (`available`) to test for immediate, market-wide level shifts.
 2. **Unsupervised Latent Adoption Propensity:** Uses KMeans/GMM clustering on *strictly pre-cutoff* static and dynamic features (e.g., pre-cutoff price variance, weekend premiums) to identify host sophistication and proxy algorithmic uptake without post-treatment leakage.
 3. **Heterogeneous Treatment Effects (Interacted IV) & PSM-DiD:** Interacts the RDD instrument with the latent proxy, and runs a Propensity-Stratified Difference-in-Differences comparing the top quartile (High Propensity) to the bottom quartile (Low Propensity).
 4. **Structural Breaks & TWFE Panel:** Uses `ruptures` to detect behavioral shifts in rolling price variance to proxy exact adoption timing, then applies Two-Way Fixed Effects models to isolate within-listing changes in price levels and volatility.
@@ -45,9 +45,9 @@ The core design uses **announcement-date policy timing** with a **fuzzy RDD** im
 │   ├── panel_extension_4_spillovers.py
 │   └── panel_extension_run_all.py
 ├── data/
-│   ├── processed/day2/ ... (generated Day 2 outputs)
-│   ├── processed/day3/ ... (generated Day 3 EDA outputs)
-│   ├── processed/day4/ ... (generated Day 4 baseline IV outputs)
+│   ├── processed/step2/ ... (generated Step 2 outputs)
+│   ├── processed/step3/ ... (generated Step 3 EDA outputs)
+│   ├── processed/step4/ ... (generated Step 4 baseline IV outputs)
 │   ├── processed/ml_extension/ ... (generated ML interaction & PSM outputs)
 │   └── processed/panel_extension/ ... (generated TWFE & structural break outputs)
 └── docs/

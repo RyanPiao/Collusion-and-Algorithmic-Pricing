@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Day 3 multicity EDA around cutoff.
+"""Step 3 multicity EDA around cutoff.
 
-Builds policy-facing descriptive outputs from Day 2 panel artifacts:
+Builds policy-facing descriptive outputs from Step 2 panel artifacts:
 1) City-level trend summaries/plots around cutoff
 2) Pre/post distribution shifts (by city and window)
 3) Treatment-support diagnostics by city/window
 4) Missingness and data-quality summaries
-5) Economist-readable Day 3 note and README update
+5) Economist-readable Step 3 note and README update
 """
 
 from __future__ import annotations
@@ -41,7 +41,7 @@ def ensure_dirs(paths: List[Path]) -> None:
 
 
 def aggregate_city_day_trends(panel_path: Path, out_csv: Path) -> pd.DataFrame:
-    """Aggregate city x relative-day trends via chunking."""
+    """Aggregate city x relative-step trends via chunking."""
     accum: Dict[Tuple[str, str, int], Dict[str, float]] = {}
 
     usecols = ["city_slug", "city_name", "days_from_cutoff", "price_usd", "log_price", "available"]
@@ -293,7 +293,7 @@ def plot_city_trends(trend_df: pd.DataFrame, fig_path: Path) -> None:
     for ax in axes[-2:]:
         ax.set_xlabel("Days from cutoff")
 
-    fig.suptitle("City-level mean nightly price trends around cutoff (7-day smooth)", y=0.995, fontsize=14)
+    fig.suptitle("City-level mean nightly price trends around cutoff (7-step smooth)", y=0.995, fontsize=14)
     fig.tight_layout()
     fig.savefig(fig_path, dpi=180)
     plt.close(fig)
@@ -389,7 +389,7 @@ def plot_support_diagnostics(support_df: pd.DataFrame, fig_path: Path) -> None:
     labels = [f"{c}\n±{w}m" for c, w in zip(d["city_slug"], d["window_months"])]
     ax.set_xticks(x)
     ax.set_xticklabels(labels, rotation=0, fontsize=8)
-    ax.set_ylabel("Listing-day observations")
+    ax.set_ylabel("Listing-step observations")
     ax.set_title("Treatment-support diagnostics: pre/post listing-days by city and window")
     ax.legend(frameon=False)
     ax.grid(axis="y", alpha=0.2)
@@ -424,11 +424,11 @@ def write_day3_note(
     mean_post = trend_df[trend_df["days_from_cutoff"] > 0]["mean_price_usd"].mean()
 
     lines = [
-        "# Day 3 EDA Note: Multi-city descriptives around cutoff",
+        "# Step 3 EDA Note: Multi-city descriptives around cutoff",
         "",
         "## 1) City-level trend behavior around the cutoff",
-        f"- Across city-day means, average nightly price is {mean_pre:,.2f} USD pre-cutoff versus {mean_post:,.2f} USD post-cutoff.",
-        "- Figure `docs/figures/day3/city_trend_mean_price_cutoff.png` shows within-city trajectories in relative event time with a cutoff marker at day 0.",
+        f"- Across city-step means, average nightly price is {mean_pre:,.2f} USD pre-cutoff versus {mean_post:,.2f} USD post-cutoff.",
+        "- Figure `docs/figures/step3/city_trend_mean_price_cutoff.png` shows within-city trajectories in relative event time with a cutoff marker at step 0.",
         "- The visual pattern is best read as descriptive evidence for local continuity/discontinuity checks; it is not a causal estimate by itself.",
         "",
         "## 2) Pre/Post distribution shifts",
@@ -448,12 +448,12 @@ def write_day3_note(
         )
 
     lines += [
-        "- Figure `docs/figures/day3/prepost_logprice_distribution_bw1m.png` overlays sampled log-price histograms (pre vs post) by city for shape comparison.",
+        "- Figure `docs/figures/step3/prepost_logprice_distribution_bw1m.png` overlays sampled log-price histograms (pre vs post) by city for shape comparison.",
         "",
         "## 3) Treatment-support diagnostics by city/window",
         f"- Thin-support flags: {thin_support_n} of {len(support_df)} city-window cells are flagged thin.",
-        f"- Composite support-ok flag (balanced pre/post observations and day coverage): {support_ok_n} of {len(support_df)} cells.",
-        "- Support diagnostics table is in `data/processed/day3/treatment_support_diagnostics_city_window.csv`.",
+        f"- Composite support-ok flag (balanced pre/post observations and step coverage): {support_ok_n} of {len(support_df)} cells.",
+        "- Support diagnostics table is in `data/processed/step3/treatment_support_diagnostics_city_window.csv`.",
         "",
         "## 4) Missingness and data quality",
         f"- Dataset-level QA checks remain clean: duplicates={int(checks_df['duplicate_city_listing_date'].iloc[0])}, window nesting violations={int(checks_df['bad_window_nesting_rows'].iloc[0])}, cutoff misalignment={int(checks_df['misaligned_cutoff_rows'].iloc[0])}.",
@@ -466,10 +466,10 @@ def write_day3_note(
         )
 
     lines += [
-        "- Full missingness summary is in `data/processed/day3/missingness_summary_city.csv`.",
+        "- Full missingness summary is in `data/processed/step3/missingness_summary_city.csv`.",
         "",
         "## Policy-facing interpretation",
-        "- The Day 3 outputs indicate where identifying support is strong enough for local fuzzy-RDD estimation and where city-window cells may require caution due to thinner support.",
+        "- The Step 3 outputs indicate where identifying support is strong enough for local fuzzy-RDD estimation and where city-window cells may require caution due to thinner support.",
         "- Pre/post distribution movement appears heterogeneous across markets; this supports reporting city-specific descriptives before pooled structural interpretation.",
         "- Structural QA checks are clean, but several host-side covariates have non-trivial missingness in some cities; inference specs should report covariate completeness and sensitivity to missing-data handling.",
     ]
@@ -479,30 +479,30 @@ def write_day3_note(
 
 def update_readme_day3(readme_path: Path) -> None:
     text = readme_path.read_text(encoding="utf-8")
-    header = "## Day 3 Multi-City EDA Around Cutoff"
+    header = "## Step 3 Multi-City EDA Around Cutoff"
     if header in text:
         return
 
     section = """
-## Day 3 Multi-City EDA Around Cutoff
+## Step 3 Multi-City EDA Around Cutoff
 
-Day 3 adds policy-oriented descriptive outputs on top of Day 2 multicity panels.
+Step 3 adds policy-oriented descriptive outputs on top of Step 2 multicity panels.
 
-### Day 3 outputs
+### Step 3 outputs
 - **EDA script:** `scripts/day3_multicity_eda.py`
 - **EDA notebook:** `day3_multicity_eda.ipynb`
-- **Trend aggregates:** `data/processed/day3/city_day_trends_cutoff.csv`
+- **Trend aggregates:** `data/processed/step3/city_day_trends_cutoff.csv`
 - **Distribution shifts:**
-  - `data/processed/day3/prepost_distribution_stats_city_window.csv`
-  - `data/processed/day3/prepost_distribution_shift_summary.csv`
-- **Treatment-support diagnostics:** `data/processed/day3/treatment_support_diagnostics_city_window.csv`
+  - `data/processed/step3/prepost_distribution_stats_city_window.csv`
+  - `data/processed/step3/prepost_distribution_shift_summary.csv`
+- **Treatment-support diagnostics:** `data/processed/step3/treatment_support_diagnostics_city_window.csv`
 - **Missingness/data quality:**
-  - `data/processed/day3/missingness_summary_city.csv`
-  - `data/processed/day3/data_quality_checks_summary.csv`
+  - `data/processed/step3/missingness_summary_city.csv`
+  - `data/processed/step3/data_quality_checks_summary.csv`
 - **Figures:**
-  - `docs/figures/day3/city_trend_mean_price_cutoff.png`
-  - `docs/figures/day3/prepost_logprice_distribution_bw1m.png`
-  - `docs/figures/day3/treatment_support_diagnostics.png`
+  - `docs/figures/step3/city_trend_mean_price_cutoff.png`
+  - `docs/figures/step3/prepost_logprice_distribution_bw1m.png`
+  - `docs/figures/step3/treatment_support_diagnostics.png`
 - **Interpretation note:** `docs/DAY3_eda_note.md`
 """.strip()
 
@@ -518,7 +518,7 @@ def write_run_summary(out_path: Path, artifacts: Dict[str, str], shapes: Dict[st
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Day 3 multicity EDA builder")
+    p = argparse.ArgumentParser(description="Step 3 multicity EDA builder")
     p.add_argument("--repo-root", type=str, default=".")
     return p.parse_args()
 
@@ -527,9 +527,9 @@ def main() -> int:
     args = parse_args()
     repo = Path(args.repo_root).resolve()
 
-    day2_proc = repo / "data" / "processed" / "day2"
-    day3_proc = repo / "data" / "processed" / "day3"
-    day3_fig = repo / "docs" / "figures" / "day3"
+    day2_proc = repo / "data" / "processed" / "step2"
+    day3_proc = repo / "data" / "processed" / "step3"
+    day3_fig = repo / "docs" / "figures" / "step3"
     docs_dir = repo / "docs"
 
     ensure_dirs([day3_proc, day3_fig, docs_dir])
@@ -537,7 +537,7 @@ def main() -> int:
     panel_path = day2_proc / "fact_listing_day_multicity.csv.gz"
     trend_csv = day3_proc / "city_day_trends_cutoff.csv"
 
-    print("[1/6] Aggregating city-day trends around cutoff...")
+    print("[1/6] Aggregating city-step trends around cutoff...")
     trend_df = aggregate_city_day_trends(panel_path, trend_csv)
 
     print("[2/6] Computing pre/post distribution shifts by city/window...")

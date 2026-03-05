@@ -1,59 +1,59 @@
-# Day 7 Weekly Recap: Airbnb Smart Pricing Fuzzy-RDD Sprint
+# Step 7 Weekly Recap: Airbnb Smart Pricing Fuzzy-RDD Sprint
 
 ## 0) Executive takeaway
-This week delivered a full end-to-end empirical workflow (Day 1–Day 7) for evaluating Airbnb Smart Pricing effects using a multicity fuzzy-RDD proxy design.
+This stage delivered a full end-to-end empirical workflow (Step 1–Step 7) for evaluating Airbnb Smart Pricing effects using a multicity fuzzy-RDD proxy design.
 
 **Bottom line:**
 - We find **no robust evidence of a large immediate local price-level shift** at the cutoff under the current proxy implementation.
-- Day 6 robustness upgrades do **not overturn** that conclusion.
+- Step 6 robustness upgrades do **not overturn** that conclusion.
 - Evidence quality is now **baseline-to-moderate** for level effects, but still **insufficient for strong causal claims** about coordination mechanisms without richer treatment telemetry and deeper diagnostics.
 
 ---
 
-## 1) What was completed this week
+## 1) What was completed this stage
 
-### Day 1 — Framing + identification lock
+### Step 1 — Framing + identification lock
 - Locked research question and estimand around Smart Pricing exposure and listing-night prices.
 - Adopted fuzzy-RDD structure with policy timing cutoff and availability proxy channel.
 
-### Day 2 — Multi-city panel build
-- Constructed multicity listing-day panel and windowed samples (±1m, ±2m, ±3m).
+### Step 2 — Multi-city panel build
+- Constructed multicity listing-step panel and windowed samples (±1m, ±2m, ±3m).
 - Documented city substitution audit (Washington DC replacing unavailable Miami endpoint).
 
-### Day 3 — EDA
+### Step 3 — EDA
 - Generated descriptive checks for price distributions and sample support by city/window.
 
-### Day 4 — Baseline fuzzy-RDD estimates
+### Step 4 — Baseline fuzzy-RDD estimates
 - Strong pooled first stage.
 - Near-zero pooled second stage across windows.
 - Placebo and bandwidth checks completed at baseline level.
 
-### Day 5 — Synthesis
+### Step 5 — Synthesis
 - Consolidated findings, limitations, and policy interpretation boundaries.
-- Produced explicit Week-2 technical agenda.
+- Produced explicit Stage-2 technical agenda.
 
-### Day 6 — Robustness/credibility hardening
+### Step 6 — Robustness/credibility hardening
 - Added conservative city-between uncertainty comparison.
 - Added continuity diagnostics and cutoff density check.
 - Added dispersion + directional co-movement diagnostics.
 
-### Day 7 — This recap
+### Step 7 — This recap
 - Confidence grading and decision-ready recommendations.
 
 ---
 
 ## 2) Core empirical readout
 
-### 2.1 Level-effect estimates (pooled, Day 4)
+### 2.1 Level-effect estimates (pooled, Step 4)
 - ±1m: **0.0034** (SE 0.0265), CI [-0.0486, 0.0554]
 - ±2m: **0.0033** (SE 0.0174), CI [-0.0307, 0.0374]
 - ±3m: **0.0027** (SE 0.0145), CI [-0.0256, 0.0311]
 
 Interpretation: coefficients are economically small and statistically indistinguishable from zero.
 
-### 2.2 Robustness overlay (Day 6)
+### 2.2 Robustness overlay (Step 6)
 - City-between uncertainty proxy remains broadly consistent with near-zero pooled effects.
-- No obvious predetermined-covariate jumps in ±7-day continuity checks.
+- No obvious predetermined-covariate jumps in ±7-step continuity checks.
 - Dispersion/co-movement diagnostics are now available, with strongest signal content in larger-city slices.
 
 ---
@@ -62,7 +62,7 @@ Interpretation: coefficients are economically small and statistically indistingu
 
 | Claim | Confidence | Why |
 |---|---|---|
-| No large immediate local level jump at cutoff (proxy design) | **Moderate** | Stable near-zero pooled estimates across windows + Day 6 robustness does not reverse sign/magnitude |
+| No large immediate local level jump at cutoff (proxy design) | **Moderate** | Stable near-zero pooled estimates across windows + Step 6 robustness does not reverse sign/magnitude |
 | True causal effect of Smart Pricing adoption on levels | **Low-to-Moderate** | Treatment proxy (`available`) is indirect; adoption telemetry missing |
 | No coordination risk from Smart Pricing | **Low** | Coordination can show up in dispersion/correlation dynamics, not just level shifts |
 | Design internal validity for local window | **Moderate** | Continuity checks broadly clean, but stronger manipulation/density and cluster-robust layers still needed |
@@ -73,7 +73,7 @@ Interpretation: coefficients are economically small and statistically indistingu
 
 ### What we can say now
 1. Under current multicity fuzzy-RDD proxy implementation, there is no detectable large local discontinuity in listing-level log prices around the cutoff.
-2. This result is robust to basic bandwidth and placebo framing, and remains directionally stable after Day 6 upgrades.
+2. This result is robust to basic bandwidth and placebo framing, and remains directionally stable after Step 6 upgrades.
 
 ### What we should not overstate
 1. “No effect” is not established.
@@ -91,7 +91,7 @@ Interpretation: coefficients are economically small and statistically indistingu
 
 ---
 
-## 6) Recommended Week 2 plan (priority order)
+## 6) Recommended Stage 2 plan (priority order)
 
 ### P0 (must do)
 1. Implement host/neighborhood-clustered inference in main estimation path.
@@ -108,7 +108,7 @@ Interpretation: coefficients are economically small and statistically indistingu
 
 ---
 
-## 7) Deliverables produced this week
+## 7) Deliverables produced this stage
 
 ### Documentation
 - `docs/DAY1_problem_framing.md`
@@ -121,8 +121,8 @@ Interpretation: coefficients are economically small and statistically indistingu
 - `docs/DAY7_weekly_recap.md` (this file)
 
 ### Data outputs
-- Day 4 estimates/diagnostics: `data/processed/day4/*`
-- Day 6 robustness outputs: `data/processed/day6/*`
+- Step 4 estimates/diagnostics: `data/processed/step4/*`
+- Step 6 robustness outputs: `data/processed/step6/*`
 
 ### Scripts
 - `scripts/day2_build_multicity_panels.py`
@@ -133,6 +133,6 @@ Interpretation: coefficients are economically small and statistically indistingu
 ---
 
 ## 8) Final handoff note
-Week 1 objective is achieved: the project now has a reproducible empirical backbone and a defensible baseline conclusion for level effects.
+Stage 1 objective is achieved: the project now has a reproducible empirical backbone and a defensible baseline conclusion for level effects.
 
-For Week 2, the most important move is to shift from “baseline valid” to “decision-grade credible” by hardening inference and elevating non-level mechanism tests (dispersion/co-movement) to primary endpoints.
+For Stage 2, the most important move is to shift from “baseline valid” to “decision-grade credible” by hardening inference and elevating non-level mechanism tests (dispersion/co-movement) to primary endpoints.

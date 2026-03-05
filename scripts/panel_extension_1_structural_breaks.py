@@ -12,12 +12,12 @@ import pandas as pd
 import ruptures as rpt
 
 ROOT = Path(__file__).resolve().parents[1]
-DAY2 = ROOT / "data/processed/day2"
-RAW_DAY2 = ROOT / "data/raw/day2"
+STEP2 = ROOT / "data/processed/step2"
+RAW_DAY2 = ROOT / "data/raw/step2"
 OUT = ROOT / "data/processed/panel_extension"
 OUT.mkdir(parents=True, exist_ok=True)
 
-INPUT_PANEL = DAY2 / "fact_listing_day_multicity_bw_3m.csv.gz"
+INPUT_PANEL = STEP2 / "fact_listing_day_multicity_bw_3m.csv.gz"
 OUTPUT_PANEL = OUT / "dynamic_proxy_panel.csv"
 OUTPUT_BREAKS = OUT / "listing_breaks.csv"
 OUTPUT_BREAK_DIST = OUT / "break_date_distribution.csv"

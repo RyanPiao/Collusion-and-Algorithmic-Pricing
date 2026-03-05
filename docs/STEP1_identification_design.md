@@ -1,4 +1,4 @@
-# Day 1 Identification Design
+# Step 1 Identification Design
 
 ## 1) Causal estimand
 Target parameter: the **local average treatment effect (LATE)** of Smart Pricing uptake on nightly price for listings near the feature announcement cutoff.
@@ -13,7 +13,7 @@ Adoption does not switch from 0 to 1 deterministically at the cutoff. Instead, r
 
 ## 3) Operational design (aligned to existing notebooks)
 ### Assignment/eligibility channel
-Use listing-day availability as eligibility proxy:
+Use listing-step availability as eligibility proxy:
 - \(E_{it} = 1[available_{it} = 1]\)
 
 Intuition: a listing that is not available cannot effectively deploy dynamic pricing for that date; available listings are “at risk” of using Smart Pricing.
@@ -30,7 +30,7 @@ where \(X_{it}\) includes host and listing controls used in notebooks (e.g., hos
 ### Second stage (local outcome equation)
 Within bandwidth \(|r_t| \le h\):
 \[
-Y_{it} = \beta \widehat{D}_{it} + g(r_t) + \theta'X_{it} + \delta_{month} + \delta_{week} + \delta_{neighborhood} + \varepsilon_{it}
+Y_{it} = \beta \widehat{D}_{it} + g(r_t) + \theta'X_{it} + \delta_{month} + \delta_{stage} + \delta_{neighborhood} + \varepsilon_{it}
 \]
 - \(\widehat{D}_{it}\): predicted adoption probability from first stage
 - Inference: heteroskedasticity-robust SE at minimum; preferred clustering by listing (and date, if feasible)
@@ -62,7 +62,7 @@ Y_{it} = \beta \widehat{D}_{it} + g(r_t) + \theta'X_{it} + \delta_{month} + \del
 - second-stage price regression,
 - bandwidth sweep showing positive treatment coefficients.
 
-Day-1 interpretation: **promising but not yet publication-grade** until treatment measurement and cutoff-exclusion assumptions are strengthened with explicit validation checks.
+Step-1 interpretation: **promising but not yet publication-grade** until treatment measurement and cutoff-exclusion assumptions are strengthened with explicit validation checks.
 
 ## 7) Immediate specification upgrades (priority)
 - Make `log(price)` the primary outcome.

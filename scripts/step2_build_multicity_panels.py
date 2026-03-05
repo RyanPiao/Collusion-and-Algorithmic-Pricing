@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Day 2 multicity panel builder.
+"""Step 2 multicity panel builder.
 
 Builds:
 1) Primary daily listing-level panel around cutoff (±3 months)
@@ -239,7 +239,7 @@ def select_cities() -> List[SelectedCity]:
         )
 
     if len(selected) != 8:
-        raise RuntimeError(f"Expected 8 cities in final Day 2 panel, got {len(selected)}")
+        raise RuntimeError(f"Expected 8 cities in final Step 2 panel, got {len(selected)}")
 
     return selected
 
@@ -297,7 +297,7 @@ def build_cutoff_map(
             primary = pooled_cutoff
             note = (
                 "No credible city-specific Smart Pricing rollout date found in source files; "
-                "using pooled fallback cutoff for Day 2 panel construction."
+                "using pooled fallback cutoff for Step 2 panel construction."
             )
             confidence = "low"
 
@@ -609,7 +609,7 @@ def write_day2_report(
     city_counts = panel_df.groupby("city_slug")["listing_id"].nunique().sort_values(ascending=False)
 
     lines = [
-        "# Day 2 Execution Status",
+        "# Step 2 Execution Status",
         "",
         "## Scope completed",
         "- Built multi-city daily listing-level panel (primary) with 8-city coverage.",
@@ -646,21 +646,21 @@ def write_day2_report(
         f"- Window nesting violations: **{qa_summary['bad_window_nesting_rows']}**",
         f"- Cutoff alignment violations (`days_from_cutoff == 0` but not post): **{qa_summary['misaligned_cutoff_rows']}**",
         f"- Max daily-vs-monthly mean price diff: **{qa_summary['max_abs_mean_price_diff_city_month']}**",
-        f"- Max daily-vs-monthly listing-day count diff: **{qa_summary['max_n_listing_days_diff_city_month']}**",
+        f"- Max daily-vs-monthly listing-step count diff: **{qa_summary['max_n_listing_days_diff_city_month']}**",
         "",
         "## Economist rationale (data-frequency choice)",
         "- **Daily panel (primary)** preserves within-city, within-window timing variation needed for local identification around the cutoff.",
         "- **Monthly aggregates (secondary)** provide lower-noise trend robustness, communication clarity, and a useful check against daily compositional volatility.",
         "",
         "## Output locations",
-        "- `data/processed/day2/fact_listing_day_multicity.csv.gz`",
-        "- `data/processed/day2/fact_listing_day_multicity_bw_1m.csv.gz`",
-        "- `data/processed/day2/fact_listing_day_multicity_bw_2m.csv.gz`",
-        "- `data/processed/day2/fact_listing_day_multicity_bw_3m.csv.gz`",
-        "- `data/processed/day2/agg_city_month_multicity.csv`",
-        "- `data/processed/day2/city_cutoff_map.csv`",
-        "- `data/processed/day2/city_selection_audit.csv`",
-        "- `data/processed/day2/qa/*`",
+        "- `data/processed/step2/fact_listing_day_multicity.csv.gz`",
+        "- `data/processed/step2/fact_listing_day_multicity_bw_1m.csv.gz`",
+        "- `data/processed/step2/fact_listing_day_multicity_bw_2m.csv.gz`",
+        "- `data/processed/step2/fact_listing_day_multicity_bw_3m.csv.gz`",
+        "- `data/processed/step2/agg_city_month_multicity.csv`",
+        "- `data/processed/step2/city_cutoff_map.csv`",
+        "- `data/processed/step2/city_selection_audit.csv`",
+        "- `data/processed/step2/qa/*`",
     ]
 
     out_path.write_text("\n".join(lines), encoding="utf-8")
@@ -669,14 +669,14 @@ def write_day2_report(
 def update_readme_day2(readme_path: Path) -> None:
     text = readme_path.read_text(encoding="utf-8")
 
-    section_header = "## Day 2 Multi-City Build"
+    section_header = "## Step 2 Multi-City Build"
     if section_header in text:
         return
 
     section = """
-## Day 2 Multi-City Build
+## Step 2 Multi-City Build
 
-Day 2 extends the Boston-focused setup into an 8-city multicity panel with explicit cutoff mapping, daily identification windows, and monthly robustness aggregates.
+Step 2 extends the Boston-focused setup into an 8-city multicity panel with explicit cutoff mapping, daily identification windows, and monthly robustness aggregates.
 
 ### What was added
 - **Primary dataset:** `fact_listing_day_multicity` (daily listing-level panel).
@@ -684,9 +684,9 @@ Day 2 extends the Boston-focused setup into an 8-city multicity panel with expli
 - **Window extracts:** ±1, ±2, and ±3 month datasets around the assigned city cutoff.
 - **QA outputs:** city-date coverage, missingness reports, support near cutoff, first-stage prep tables, and consistency checks.
 
-### Cutoff policy for Day 2
+### Cutoff policy for Step 2
 - Pipeline supports city-specific cutoff overrides when credible dates are available.
-- Where city-specific rollout dates are not available, Day 2 uses a pooled fallback cutoff and records this decision in `city_cutoff_map` with source metadata.
+- Where city-specific rollout dates are not available, Step 2 uses a pooled fallback cutoff and records this decision in `city_cutoff_map` with source metadata.
 
 ### Data-frequency rationale
 - **Daily (primary):** needed for local identification around cutoff timing in fuzzy-RDD style designs.
@@ -698,7 +698,7 @@ Day 2 extends the Boston-focused setup into an 8-city multicity panel with expli
 
 
 def parse_args() -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Build Day 2 multicity daily/monthly panels")
+    p = argparse.ArgumentParser(description="Build Step 2 multicity daily/monthly panels")
     p.add_argument("--repo-root", type=str, default=".")
     p.add_argument("--pooled-cutoff", type=str, default="2025-09-01")
     p.add_argument("--secondary-cutoff", type=str, default="2025-10-01")
@@ -711,8 +711,8 @@ def main() -> int:
     args = parse_args()
 
     repo = Path(args.repo_root).resolve()
-    data_raw = repo / "data" / "raw" / "day2"
-    data_proc = repo / "data" / "processed" / "day2"
+    data_raw = repo / "data" / "raw" / "step2"
+    data_proc = repo / "data" / "processed" / "step2"
     qa_dir = data_proc / "qa"
     docs_dir = repo / "docs"
 
@@ -797,7 +797,7 @@ def main() -> int:
     print("[5/7] Running QA checks...")
     qa_summary = qa_checks(panel_df, monthly_df, qa_dir)
 
-    print("[6/7] Writing Day 2 report + README updates...")
+    print("[6/7] Writing Step 2 report + README updates...")
     write_day2_report(
         out_path=docs_dir / "DAY2_STATUS.md",
         selected=selected,

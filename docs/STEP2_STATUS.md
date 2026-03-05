@@ -1,4 +1,4 @@
-# Day 2 Execution Status
+# Step 2 Execution Status
 
 ## Scope completed
 - Built multi-city daily listing-level panel (primary) with 8-city coverage.
@@ -9,7 +9,7 @@
 ## City scope used
 Boston, New York City, Los Angeles, San Francisco, Austin, Chicago, Seattle, Washington DC
 
-> Requested Miami coverage was unavailable in the current InsideAirbnb endpoint; Washington DC was used as the approved alternate replacement (see `data/processed/day2/city_selection_audit.csv`).
+> Requested Miami coverage was unavailable in the current InsideAirbnb endpoint; Washington DC was used as the approved alternate replacement (see `data/processed/step2/city_selection_audit.csv`).
 
 ## Cutoff mapping
 - Primary pooled fallback cutoff: **2025-09-01**
@@ -39,18 +39,18 @@ Boston, New York City, Los Angeles, San Francisco, Austin, Chicago, Seattle, Was
 - Window nesting violations: **0**
 - Cutoff alignment violations (`days_from_cutoff == 0` but not post): **0**
 - Max daily-vs-monthly mean price diff: **0.0000000000**
-- Max daily-vs-monthly listing-day count diff: **0**
+- Max daily-vs-monthly listing-step count diff: **0**
 
 ## Economist rationale (data-frequency choice)
 - **Daily panel (primary)** preserves within-city, within-window timing variation needed for local identification around the cutoff.
 - **Monthly aggregates (secondary)** provide lower-noise trend robustness, communication clarity, and a useful check against daily compositional volatility.
 
 ## Output locations
-- `data/processed/day2/fact_listing_day_multicity.csv.gz`
-- `data/processed/day2/fact_listing_day_multicity_bw_1m.csv.gz`
-- `data/processed/day2/fact_listing_day_multicity_bw_2m.csv.gz`
-- `data/processed/day2/fact_listing_day_multicity_bw_3m.csv.gz`
-- `data/processed/day2/agg_city_month_multicity.csv`
-- `data/processed/day2/city_cutoff_map.csv`
-- `data/processed/day2/city_selection_audit.csv`
-- `data/processed/day2/qa/*`
+- `data/processed/step2/fact_listing_day_multicity.csv.gz`
+- `data/processed/step2/fact_listing_day_multicity_bw_1m.csv.gz`
+- `data/processed/step2/fact_listing_day_multicity_bw_2m.csv.gz`
+- `data/processed/step2/fact_listing_day_multicity_bw_3m.csv.gz`
+- `data/processed/step2/agg_city_month_multicity.csv`
+- `data/processed/step2/city_cutoff_map.csv`
+- `data/processed/step2/city_selection_audit.csv`
+- `data/processed/step2/qa/*`

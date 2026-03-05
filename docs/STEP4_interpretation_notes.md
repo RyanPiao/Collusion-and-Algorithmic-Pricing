@@ -1,17 +1,17 @@
-# Day 4 Interpretation Notes: Multicity Fuzzy RDD Baseline
+# Step 4 Interpretation Notes: Multicity Fuzzy RDD Baseline
 
 ## What was estimated (baseline)
-Day 4 implements a multicity fuzzy-RDD-style IV baseline over Day 2 windows (±1m/±2m/±3m) using the daily listing panel.
+Step 4 implements a multicity fuzzy-RDD-style IV baseline over Step 2 windows (±1m/±2m/±3m) using the daily listing panel.
 
 - **Outcome:** `log_price`
-- **Endogenous treatment proxy:** `available` (listing-day availability)
+- **Endogenous treatment proxy:** `available` (listing-step availability)
 - **Excluded instrument:** `post_cutoff`
 - **RDD controls:** local linear running-variable terms (`days_from_cutoff`, `post_cutoff × days_from_cutoff`) plus listing/host controls
 - **Estimands reported:** pooled and city-level local effects by bandwidth window
 
 This should be interpreted as a **baseline reduced-form/IV proxy design**, not a final structural estimate of Smart Pricing adoption effects.
 
-## Core Day 4 readout
+## Core Step 4 readout
 
 ### 1) First stage (relevance)
 Pooled first-stage strength is strong across windows:
@@ -38,7 +38,7 @@ City-level second-stage estimates are also generally imprecise in this baseline 
 - **Placebo cutoffs (±30 days in ±3m sample):** placebo specifications do not produce stable statistically significant effects; one placebo has a weak first stage, reinforcing caution in over-interpreting placebo magnitudes.
 
 ## Causal-language guardrails
-These Day 4 estimates support a cautious statement:
+These Step 4 estimates support a cautious statement:
 
 > Under this baseline proxy implementation, we do not detect a robust local discontinuous shift in listing price levels attributable to the instrumented treatment proxy around the assigned cutoff.
 
@@ -54,12 +54,12 @@ Policy-relevant interpretation should remain restrained:
 - That is **not equivalent** to evidence of no algorithmic coordination risk.
 - Antitrust-relevant concerns often operate through **dispersion compression, synchronized adjustment, or dynamic co-movement**, which can be weakly reflected in level effects alone.
 
-So, the Day 4 output is best viewed as a screening baseline: useful for ruling out very large local level effects, but insufficient by itself to adjudicate collusion-risk mechanisms.
+So, the Step 4 output is best viewed as a screening baseline: useful for ruling out very large local level effects, but insufficient by itself to adjudicate collusion-risk mechanisms.
 
 ## Files produced
-- `data/processed/day4/first_stage_strength_city_window.csv`
-- `data/processed/day4/second_stage_pooled_window_estimates.csv`
-- `data/processed/day4/second_stage_city_window_estimates.csv`
-- `data/processed/day4/diagnostic_bandwidth_sensitivity_pooled.csv`
-- `data/processed/day4/diagnostic_placebo_cutoff_pooled_bw3m.csv`
-- `data/processed/day4/day4_run_summary.json`
+- `data/processed/step4/first_stage_strength_city_window.csv`
+- `data/processed/step4/second_stage_pooled_window_estimates.csv`
+- `data/processed/step4/second_stage_city_window_estimates.csv`
+- `data/processed/step4/diagnostic_bandwidth_sensitivity_pooled.csv`
+- `data/processed/step4/diagnostic_placebo_cutoff_pooled_bw3m.csv`
+- `data/processed/step4/day4_run_summary.json`

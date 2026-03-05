@@ -1,4 +1,4 @@
-# Day 1 Identification Notes
+# Step 1 Identification Notes
 
 ## Empirical objective
 Estimate the local causal effect of Smart Pricing exposure on nightly listing prices around policy rollout timing.

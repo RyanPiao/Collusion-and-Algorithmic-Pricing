@@ -9,7 +9,7 @@ Algorithmic pricing tools are increasingly dominant in digital marketplaces, spa
 **3. Data Used**
 * **Type:** Public Real. 
 * **Provenance:** Inside Airbnb multicity daily listing panel (Austin, Boston, Chicago, Los Angeles, New York City, San Francisco, Seattle, and Washington, DC).
-* **Scope:** 24.2+ million listing-day observations spanning symmetric ±1 to ±3 month bandwidths around city-specific policy rollouts. 
+* **Scope:** 24.2+ million listing-step observations spanning symmetric ±1 to ±3 month bandwidths around city-specific policy rollouts. 
 
 **4. Method in Plain English**
 We employed a three-tiered empirical pipeline to isolate the algorithm's true effect from cross-sectional noise:
@@ -21,7 +21,7 @@ We employed a three-tiered empirical pipeline to isolate the algorithm's true ef
 **5. Key Findings**
 * **The "Big Null" on Average Prices:** The rollout of the algorithm did *not* cause a sudden, market-wide jump in average price levels (Fuzzy RDD coefficient: 0.0027, p = 0.85). 
 * **Omitted Variable Bias is Deceptive:** While ML shows algorithm adopters charge massively higher prices generally, our fixed-effects models prove this is purely associational; expensive, professionalized hosts are simply more likely to adopt algorithms.
-* **The True Footprint is Volatility:** Adopting the algorithm significantly increases rolling 7-day price variance (p < 0.001) but leaves average price levels unchanged (p = 0.10). 
+* **The True Footprint is Volatility:** Adopting the algorithm significantly increases rolling 7-step price variance (p < 0.001) but leaves average price levels unchanged (p = 0.10). 
 * **No Price Umbrellas:** There is zero statistically significant evidence of localized spatial collusion; a neighborhood heavily saturated with algorithmic pricing does not allow non-adopting neighbors to artificially hike their own rates.
 
 **6. Robustness Summary**
@@ -39,12 +39,12 @@ These findings support the "Cognitive Constraint" hypothesis: pricing algorithms
 2. Run baseline Fuzzy RDD: `python scripts/day4_multicity_fuzzy_rdd.py`
 3. Run ML proxy generation: `python scripts/ml_unsupervised_extension.py --repo-root .`
 4. Run longitudinal panel extensions: `python scripts/panel_extension_run_all.py`
-*Outputs are mapped to `data/processed/day4/`, `ml_extension/`, and `panel_extension/`.*
+*Outputs are mapped to `data/processed/step4/`, `ml_extension/`, and `panel_extension/`.*
 
 **10. Evidence Links & Next Steps**
 * **Repo:** `tech-econ-airbnb-algorithmic-pricing`
 * **Citations:** Callaway & Sant'Anna (2021) for staggered DiD framework; Bai & Perron (1998) for structural break logic. 
-* **Next-Week Plan:** Switch to Synthetic Data (Week B). Build a theoretical matching market simulation to test how platform fee structures interact with algorithmic price ceilings.
+* **Next-Stage Plan:** Switch to Synthetic Data (Stage B). Build a theoretical matching market simulation to test how platform fee structures interact with algorithmic price ceilings.
 
 ### 🎓 Teaching Note (For ECON 5200 / ECON 3916 / ECON 2316 / ECON 1116)
 

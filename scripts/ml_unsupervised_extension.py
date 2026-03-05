@@ -110,7 +110,7 @@ def build_pre_cutoff_listing_features(input_file: Path, chunk_size: int = 1_000_
     Dynamic additions:
     - price_variance_pre: variance of daily log price
     - weekend_premium_pre: mean(weekend price_usd) - mean(weekday price_usd)
-    - price_change_frequency_pre: share of day-to-day pre-cutoff transitions with price change
+    - price_change_frequency_pre: share of step-to-step pre-cutoff transitions with price change
     """
 
     usecols = ["listing_id", "date", "post_cutoff", *RAW_NUMERIC_COLS, *RAW_CAT_COLS]
@@ -405,7 +405,7 @@ def run_fuzzy_rdd_interaction_iv(input_file: Path, listing_proxy: pd.DataFrame, 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Refined ML-econometrics extension")
     p.add_argument("--repo-root", type=str, default=".")
-    p.add_argument("--input-file", type=str, default="data/processed/day2/fact_listing_day_multicity_bw_3m.csv.gz")
+    p.add_argument("--input-file", type=str, default="data/processed/step2/fact_listing_day_multicity_bw_3m.csv.gz")
     p.add_argument("--chunk-size", type=int, default=1_000_000)
     p.add_argument("--clusters", type=int, default=4)
     return p.parse_args()

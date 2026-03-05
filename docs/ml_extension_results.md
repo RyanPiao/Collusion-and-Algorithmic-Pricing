@@ -2,8 +2,8 @@
 
 ## Run Scope
 - Script: `scripts/ml_unsupervised_extension.py`
-- Input panel: `data/processed/day2/fact_listing_day_multicity_bw_3m.csv.gz`
-- Estimation sample: 24,228,568 listing-day observations (±3 month window)
+- Input panel: `data/processed/step2/fact_listing_day_multicity_bw_3m.csv.gz`
+- Estimation sample: 24,228,568 listing-step observations (±3 month window)
 - Listing-level latent proxy count: 131,677 listings
 - Clustering models: KMeans (`k=4`) and GMM (`k=4`)
 
@@ -75,7 +75,7 @@ The refined pipeline in `scripts/ml_unsupervised_extension.py` now computes beha
 
 - `price_variance_pre`: listing-level variance of daily `log_price` before cutoff.
 - `weekend_premium_pre`: mean(`price_usd` on Fri/Sat) minus mean(`price_usd` on weekdays) before cutoff.
-- `price_change_frequency_pre`: share of pre-cutoff day-to-day transitions with a non-zero price change.
+- `price_change_frequency_pre`: share of pre-cutoff step-to-step transitions with a non-zero price change.
 
 Implementation notes:
 - Missing variance for listings with <2 pre-cutoff observations is median-imputed (post-filter, pre-clustering).

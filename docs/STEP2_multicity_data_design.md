@@ -1,4 +1,4 @@
-# Day 2 Multi-City Data Design (Implementation Brief)
+# Step 2 Multi-City Data Design (Implementation Brief)
 
 ## Goal
 Build a multi-city analysis panel for fuzzy RDD around Airbnb Smart Pricing rollout timing, with:
@@ -11,7 +11,7 @@ Build a multi-city analysis panel for fuzzy RDD around Airbnb Smart Pricing roll
 
 ## 1) City scope (8 major markets)
 
-Use these cities in Day 2 (requested set):
+Use these cities in Step 2 (requested set):
 1. Boston (`boston`)
 2. New York City (`new-york-city`)
 3. Los Angeles (`los-angeles`)
@@ -40,7 +40,7 @@ If one requested city is unavailable in current source endpoints, substitute **W
 - `city_slug`
 - `city_name`
 - `listing_id`
-- `date` (listing-day)
+- `date` (listing-step)
 
 **Outcome + treatment proxy inputs**
 - `price_usd` (clean numeric)
@@ -60,10 +60,10 @@ If one requested city is unavailable in current source endpoints, substitute **W
 - `in_bw_2m` (within ±2 months)
 - `in_bw_3m` (within ±3 months)
 
-**Core controls (already used in Day 1, harmonized cross-city)**
+**Core controls (already used in Step 1, harmonized cross-city)**
 - Listing: room/property type, accommodates, bedrooms/bathrooms (if available)
 - Host: superhost, response/acceptance indicators, host tenure proxy
-- Time/location: day-of-week, month FE, neighborhood identifier (or city-neighborhood FE)
+- Time/location: step-of-stage, month FE, neighborhood identifier (or city-neighborhood FE)
 
 ## B. Secondary: `agg_city_month_multicity`
 - **Unit:** `city × year_month`
@@ -94,7 +94,7 @@ Create and version a lookup table: **`city_cutoff_map`** with:
 
 ### Assignment hierarchy
 1. **If credible city-specific rollout date exists**, use it as `cutoff_date_primary`.
-2. Else use a pooled fallback `cutoff_date_primary` (configured in the Day 2 build script; auditable in `city_cutoff_map`).
+2. Else use a pooled fallback `cutoff_date_primary` (configured in the Step 2 build script; auditable in `city_cutoff_map`).
 3. Keep a pooled `cutoff_date_secondary` for sensitivity runs.
 4. Persist source metadata so date choices are auditable.
 
@@ -109,7 +109,7 @@ Create and version a lookup table: **`city_cutoff_map`** with:
 
 ## 4) Event-window definitions (required)
 
-Use **calendar-month arithmetic** (not fixed 30-day approximation):
+Use **calendar-month arithmetic** (not fixed 30-step approximation):
 - `in_bw_1m = 1` if `date ∈ [cutoff_date_city - 1 month, cutoff_date_city + 1 month]`
 - `in_bw_2m = 1` if `date ∈ [cutoff_date_city - 2 months, cutoff_date_city + 2 months]`
 - `in_bw_3m = 1` if `date ∈ [cutoff_date_city - 3 months, cutoff_date_city + 3 months]`
@@ -152,7 +152,7 @@ Use **calendar-month arithmetic** (not fixed 30-day approximation):
 
 ---
 
-## Day 2 deliverable outputs
+## Step 2 deliverable outputs
 - `fact_listing_day_multicity` (primary analysis panel)
 - `agg_city_month_multicity` (robustness/communication panel)
 - `city_cutoff_map` (with source metadata and confidence tags)

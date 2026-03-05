@@ -1,4 +1,4 @@
-# Day 1 Next Steps (Execution Plan)
+# Step 1 Next Steps (Execution Plan)
 
 ## Objective for the next 3–5 working days
 Move from promising prototype estimates to a defensible causal design with transparent assumptions, reproducible code, and clear robustness evidence.
@@ -11,7 +11,7 @@ Move from promising prototype estimates to a defensible causal design with trans
 ## Priority 1: treatment measurement upgrade
 - [ ] Reconcile treatment proxy across notebooks:
   - host-level `tool_use` from clustering (Step 2),
-  - listing-day eligibility via `available == 1`,
+  - listing-step eligibility via `available == 1`,
   - combined uptake proxy (e.g., `actual_tool_use = tool_use * available`) vs propensity score approach.
 - [ ] Produce a one-page “treatment validation note” describing what each proxy captures and misses.
 - [ ] Report first-stage strength for each candidate proxy.

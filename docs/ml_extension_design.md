@@ -6,9 +6,9 @@ This extension augments the multicity fuzzy-RDD pipeline with an **unsupervised,
 The estimand remains unchanged from the broader design: local pricing responses around rollout timing. The ML layer supplies an additional empirical regressor/proxy; it does **not** identify true treatment status.
 
 ## Econometric Positioning in the Existing Design
-The baseline Day 4 framework uses listing-day availability as the main uptake-related proxy near policy timing. The ML extension adds a listing-level latent proxy constructed from pre-cutoff observables only:
+The baseline Step 4 framework uses listing-step availability as the main uptake-related proxy near policy timing. The ML extension adds a listing-level latent proxy constructed from pre-cutoff observables only:
 
-- Baseline proxy: `available` (listing-day, time varying).
+- Baseline proxy: `available` (listing-step, time varying).
 - ML proxy: `latent_adoption_propensity_proxy` (listing-level, time invariant within the ±3 month window).
 
 This allows a structured comparison of reduced-form model behavior under two different proxy constructions.
@@ -37,7 +37,7 @@ This ensures the latent proxy is fixed before cutoff in the analysis sample.
 - `host_tenure_days_pre`
 - `host_is_superhost_pre`, `host_identity_verified_pre`
 - `host_response_rate_pre`, `host_acceptance_rate_pre`
-- `pre_obs` (number of pre-cutoff listing-day observations)
+- `pre_obs` (number of pre-cutoff listing-step observations)
 
 ### Categorical features
 - `city_slug`
@@ -76,7 +76,7 @@ The extension constructs a continuous proxy using GMM posterior probabilities:
 Interpretation: relative latent propensity ranking, not true adoption probability.
 
 ## Econometric Comparison Layer
-Using the full ±3 month listing-day panel, the script estimates four OLS models with city fixed effects and local running-variable controls (`days_from_cutoff`, `post_cutoff × days_from_cutoff`). HC1 robust standard errors are reported.
+Using the full ±3 month listing-step panel, the script estimates four OLS models with city fixed effects and local running-variable controls (`days_from_cutoff`, `post_cutoff × days_from_cutoff`). HC1 robust standard errors are reported.
 
 ### First-stage comparison
 - Baseline first stage: `available ~ post_cutoff + controls`

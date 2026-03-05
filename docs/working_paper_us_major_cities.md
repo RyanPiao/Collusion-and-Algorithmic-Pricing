@@ -1,18 +1,18 @@
 # Algorithmic Pricing, Market Conduct, and Antitrust Risk in U.S. Major Cities: Evidence from Airbnb Smart Pricing
 
 ## Abstract
-This paper evaluates whether Airbnb Smart Pricing rollout timing is associated with discontinuous local shifts in listing price levels across major U.S. markets. We assemble a multicity daily listing panel and estimate a fuzzy regression discontinuity / instrumental-variables design using policy timing (`post_cutoff`) as an instrument for listing-day availability (`available`) within symmetric bandwidths around the cutoff. The analysis covers Austin, Boston, Chicago, Los Angeles, New York City, San Francisco, Seattle, and Washington, DC.
+This paper evaluates whether Airbnb Smart Pricing rollout timing is associated with discontinuous local shifts in listing price levels across major U.S. markets. We assemble a multicity daily listing panel and estimate a fuzzy regression discontinuity / instrumental-variables design using policy timing (`post_cutoff`) as an instrument for listing-step availability (`available`) within symmetric bandwidths around the cutoff. The analysis covers Austin, Boston, Chicago, Los Angeles, New York City, San Francisco, Seattle, and Washington, DC.
 
-Using pooled Day 4 estimates, the instrumented local price effects are economically small and statistically imprecise in all windows: 0.0034 (SE 0.0265) in ±1 month, 0.0033 (SE 0.0174) in ±2 months, and 0.0027 (SE 0.0145) in ±3 months. In semi-elasticity terms, these correspond to approximately 0.27%–0.34% point estimates with confidence intervals that include substantively negative and positive values. First-stage relevance is strong in pooled samples (F-statistics from 4,158 to 13,906), and bandwidth/placebo diagnostics do not show stable alternative breakpoints. To motivate heterogeneity follow-up without overturning this baseline null framing, we add an ML-econometrics extension that builds an unsupervised listing-level latent adoption propensity proxy and compares first- and second-stage behavior in the ±3 month panel. In that extension, `post_cutoff` is near-zero for the latent proxy first stage (0.00003, p = 0.8109), while higher latent propensity is strongly associated with higher pooled log prices; we interpret this as a proxy-based heterogeneity signal rather than causal proof of Smart Pricing adoption effects.
+Using pooled Step 4 estimates, the instrumented local price effects are economically small and statistically imprecise in all windows: 0.0034 (SE 0.0265) in ±1 month, 0.0033 (SE 0.0174) in ±2 months, and 0.0027 (SE 0.0145) in ±3 months. In semi-elasticity terms, these correspond to approximately 0.27%–0.34% point estimates with confidence intervals that include substantively negative and positive values. First-stage relevance is strong in pooled samples (F-statistics from 4,158 to 13,906), and bandwidth/placebo diagnostics do not show stable alternative breakpoints. To motivate heterogeneity follow-up without overturning this baseline null framing, we add an ML-econometrics extension that builds an unsupervised listing-level latent adoption propensity proxy and compares first- and second-stage behavior in the ±3 month panel. In that extension, `post_cutoff` is near-zero for the latent proxy first stage (0.00003, p = 0.8109), while higher latent propensity is strongly associated with higher pooled log prices; we interpret this as a proxy-based heterogeneity signal rather than causal proof of Smart Pricing adoption effects.
 
 ## 1. Introduction
 Algorithmic pricing tools are increasingly central to digital marketplace operations, but their competition-policy implications remain contested. A core concern is whether shared algorithmic adjustment rules can generate synchronized pricing behavior consistent with tacit coordination, even absent explicit communication. Airbnb Smart Pricing provides a useful empirical setting because rollout timing offers a quasi-experimental anchor and host responses are heterogeneous.
 
-This study asks a focused question: **is there a local discontinuous change in listing price levels around Smart Pricing rollout timing in a multicity panel?** Baseline pooled Day 4 estimates are economically small and statistically null on average. We therefore extend the design with a novel ML-econometrics heterogeneity layer: an unsupervised latent adoption propensity index constructed from strictly pre-treatment listing behavior (including dynamic price-adjustment features), and then embedded in interacted IV and propensity-stratified DiD specifications. This allows us to test whether effects are concentrated in specific host segments even when aggregate market-level discontinuities are flat.
+This study asks a focused question: **is there a local discontinuous change in listing price levels around Smart Pricing rollout timing in a multicity panel?** Baseline pooled Step 4 estimates are economically small and statistically null on average. We therefore extend the design with a novel ML-econometrics heterogeneity layer: an unsupervised latent adoption propensity index constructed from strictly pre-treatment listing behavior (including dynamic price-adjustment features), and then embedded in interacted IV and propensity-stratified DiD specifications. This allows us to test whether effects are concentrated in specific host segments even when aggregate market-level discontinuities are flat.
 
 ## 2. Data and Setting
 ### 2.1 Data construction
-The empirical panel is generated from the project’s multicity pipeline and stored in processed outputs under `data/processed/day2/` through `data/processed/day4/`. The baseline estimation windows use symmetric cutoffs at ±1, ±2, and ±3 months around assigned city policy timing.
+The empirical panel is generated from the project’s multicity pipeline and stored in processed outputs under `data/processed/step2/` through `data/processed/step4/`. The baseline estimation windows use symmetric cutoffs at ±1, ±2, and ±3 months around assigned city policy timing.
 
 ### 2.2 Geographic scope
 The analysis includes eight U.S. cities:
@@ -26,8 +26,8 @@ The analysis includes eight U.S. cities:
 - Washington, DC
 
 ### 2.3 Outcome and treatment proxy
-- **Outcome:** listing-day `log_price`
-- **Endogenous proxy treatment:** `available` (listing-day availability)
+- **Outcome:** listing-step `log_price`
+- **Endogenous proxy treatment:** `available` (listing-step availability)
 - **Instrument:** `post_cutoff`
 
 This is a proxy implementation of Smart Pricing exposure and should not be interpreted as direct adoption telemetry.
@@ -46,10 +46,10 @@ We estimate a local fuzzy-RDD-style IV specification around the cutoff:
    log\_price_{it} = \beta\,\widehat{available}_{it} + f(days\_from\_cutoff_{it}) + X_{it}'\delta + \varepsilon_{it}
    \]
 
-where \(f(\cdot)\) contains local linear running-variable terms and interactions consistent with the Day 4 baseline scripts. Estimation is repeated for ±1m, ±2m, and ±3m windows.
+where \(f(\cdot)\) contains local linear running-variable terms and interactions consistent with the Step 4 baseline scripts. Estimation is repeated for ±1m, ±2m, and ±3m windows.
 
 ### 3.2 Baseline controls and identification scope
-Controls include listing-day observables (minimum/maximum nights, capacity/rooms, host tenure/verification) and city fixed effects in pooled runs. As in the baseline pipeline, this design identifies local discontinuities in the proxy treatment channel around the rollout threshold, not direct adoption telemetry.
+Controls include listing-step observables (minimum/maximum nights, capacity/rooms, host tenure/verification) and city fixed effects in pooled runs. As in the baseline pipeline, this design identifies local discontinuities in the proxy treatment channel around the rollout threshold, not direct adoption telemetry.
 
 ### 3.3 Unsupervised latent adoption propensity
 To address sparsity and omitted-variable concerns in observed treatment proxies, we construct a listing-level latent adoption propensity index via unsupervised learning (`scripts/ml_unsupervised_extension.py`).
@@ -58,7 +58,7 @@ A key design choice is strict leakage prevention: **all engineered proxy feature
 
 - `price_variance_pre`: variance of daily pre-cutoff `log_price`
 - `weekend_premium_pre`: pre-cutoff Fri/Sat minus weekday mean price premium
-- `price_change_frequency_pre`: pre-cutoff frequency of day-to-day price changes
+- `price_change_frequency_pre`: pre-cutoff frequency of step-to-step price changes
 
 Listings with insufficient pre-period observations for variance are handled via median imputation after pre-period filtering, preserving sample size without post-treatment information leakage. We then standardize features and estimate KMeans/GMM (`k=4`) to produce a normalized continuous latent propensity index.
 
@@ -85,10 +85,10 @@ We complement the IV heterogeneity design with a propensity-stratified TWFE DiD 
 
 We estimate a TWFE DiD around event time 0 and an event-study with period \(t=-1\) omitted. This design tests whether post-rollout pricing dynamics diverge between ex-ante high- and low-propensity host segments.
 
-## 4. Baseline Results (Day 4)
+## 4. Baseline Results (Step 4)
 
 ### 4.1 First-stage relevance (pooled)
-From `data/processed/day4/first_stage_strength_city_window.csv`, pooled first-stage F-statistics are:
+From `data/processed/step4/first_stage_strength_city_window.csv`, pooled first-stage F-statistics are:
 - ±1 month: **4,158.50**
 - ±2 months: **9,715.53**
 - ±3 months: **13,905.54**
@@ -96,7 +96,7 @@ From `data/processed/day4/first_stage_strength_city_window.csv`, pooled first-st
 These values indicate strong pooled instrument relevance for the proxy treatment channel.
 
 ### 4.2 Pooled second-stage estimates
-From `data/processed/day4/second_stage_pooled_window_estimates.csv`:
+From `data/processed/step4/second_stage_pooled_window_estimates.csv`:
 
 | Window | N | \(\hat\beta\) on `available_hat` | SE | 95% CI |
 |---|---:|---:|---:|---:|
@@ -107,27 +107,27 @@ From `data/processed/day4/second_stage_pooled_window_estimates.csv`:
 Interpretation: point estimates are close to zero and imprecise across all windows. In approximate percentage terms, these correspond to 0.34%, 0.34%, and 0.27% semi-elasticities, respectively.
 
 ### 4.3 City-window heterogeneity
-From `data/processed/day4/second_stage_city_window_estimates.csv`, city-window estimates are generally imprecise, and none are conventionally significant in this baseline specification. Several city-window cells also show weaker first-stage strength, reinforcing caution against over-interpreting city-level point estimates.
+From `data/processed/step4/second_stage_city_window_estimates.csv`, city-window estimates are generally imprecise, and none are conventionally significant in this baseline specification. Several city-window cells also show weaker first-stage strength, reinforcing caution against over-interpreting city-level point estimates.
 
 ## 5. Robustness and Diagnostic Evidence
 
 ### 5.1 Bandwidth sensitivity
-`data/processed/day4/diagnostic_bandwidth_sensitivity_pooled.csv` shows stable near-zero pooled coefficients as bandwidth expands from ±1m to ±3m, with confidence intervals crossing zero in every window.
+`data/processed/step4/diagnostic_bandwidth_sensitivity_pooled.csv` shows stable near-zero pooled coefficients as bandwidth expands from ±1m to ±3m, with confidence intervals crossing zero in every window.
 
 ### 5.2 Placebo cutoffs
-`data/processed/day4/diagnostic_placebo_cutoff_pooled_bw3m.csv` reports:
+`data/processed/step4/diagnostic_placebo_cutoff_pooled_bw3m.csv` reports:
 - True cutoff (0d): coefficient = 0.0027, p = 0.8501
 - Placebo −30d: coefficient = −0.0447, p = 0.9426
 - Placebo +30d: coefficient = 0.0163, p = 0.9090
 
 No placebo specification yields a stable significant discontinuity.
 
-### 5.3 Week 2 inference and validity checks
-Additional Week 2 outputs are directionally consistent with the Day 4 baseline:
-- Clustered-inference table (`data/processed/week2/inference_clustered_iv.csv`) keeps coefficients near zero across windows.
-- Density checks (`data/processed/week2/density_tests.csv`) show balanced left/right mass around cutoff in the current panel construction.
-- Covariate continuity (`data/processed/week2/covariate_continuity_by_bw.csv`) shows zero measured jumps for predetermined listing/host attributes in tested local windows.
-- Mechanism endpoint files (`data/processed/week2/dispersion_endpoint_estimates.csv`, `data/processed/week2/comovement_endpoint_estimates.csv`) suggest some city-specific synchrony/dispersion movements but no uniform cross-city mechanism pattern.
+### 5.3 Stage 2 inference and validity checks
+Additional Stage 2 outputs are directionally consistent with the Step 4 baseline:
+- Clustered-inference table (`data/processed/stage2/inference_clustered_iv.csv`) keeps coefficients near zero across windows.
+- Density checks (`data/processed/stage2/density_tests.csv`) show balanced left/right mass around cutoff in the current panel construction.
+- Covariate continuity (`data/processed/stage2/covariate_continuity_by_bw.csv`) shows zero measured jumps for predetermined listing/host attributes in tested local windows.
+- Mechanism endpoint files (`data/processed/stage2/dispersion_endpoint_estimates.csv`, `data/processed/stage2/comovement_endpoint_estimates.csv`) suggest some city-specific synchrony/dispersion movements but no uniform cross-city mechanism pattern.
 
 ## 6. Heterogeneous & Dynamic Results
 This section integrates the refined ML-econometrics extension into the core empirical narrative using newly computed outputs in `data/processed/ml_extension/`.
@@ -138,7 +138,7 @@ Using the updated dynamic pre-cutoff feature set and GMM (`k=4`), the latent pro
 - Mean: **0.4276**
 - Max: **1.0000**
 
-(From `run_summary.json`; 131,677 listings, 24,228,568 listing-day observations in ±3m panel.)
+(From `run_summary.json`; 131,677 listings, 24,228,568 listing-step observations in ±3m panel.)
 
 ### 6.2 Interaction IV estimates (HC1 robust)
 From `heterogeneous_iv_interaction_results.csv`:
@@ -178,7 +178,7 @@ From `psm_did_event_study.csv` and `psm_did_event_study_plot.png`:
 Accordingly, the event-study supports heterogeneity in levels across propensity groups, but does not indicate a large new post-rollout discontinuity distinct from pre-existing group differences.
 
 ### 6.5 Positioning relative to baseline and structural extensions
-These results do not replace the baseline Day 4 pooled null or the structural-break panel exercises. Instead, they provide a more rigorous heterogeneity solution to sparsity and omitted-variable concerns by:
+These results do not replace the baseline Step 4 pooled null or the structural-break panel exercises. Instead, they provide a more rigorous heterogeneity solution to sparsity and omitted-variable concerns by:
 1. imposing strict pre-treatment feature construction,
 2. estimating interacted IV effects directly, and
 3. benchmarking group-differential dynamics via propensity-stratified DiD/event-study.
@@ -189,7 +189,7 @@ These results do not replace the baseline Day 4 pooled null or the structural-br
 3. **Inference sensitivity:** clustered versus homoskedastic uncertainty can differ in very large panels.
 4. **Mechanism scope:** level effects alone are not sufficient to evaluate coordination-risk channels such as dispersion compression or dynamic co-movement.
 5. **City-level precision heterogeneity:** some city-window first stages are weak, limiting local interpretation.
-6. **Temporal Resolution and Calendar Snapshots:** The underlying Inside Airbnb dataset relies on periodic (e.g., monthly or quarterly) scrapes of forward-looking host availability calendars. Consequently, the constructed "daily panel" captures the variance of scheduled prices across future dates as they existed exactly on the day of the scrape, rather than continuous, high-frequency longitudinal price changes made in real-time. Therefore, the significant increase in rolling 7-day price variance observed among algorithmic adopters (Section 9.6) should be strictly interpreted as the algorithm populating the calendar with a highly differentiated, complex schedule of forward-looking price discrimination, rather than definitive proof of active, day-to-day dynamic adjustments occurring between scrape intervals.
+6. **Temporal Resolution and Calendar Snapshots:** The underlying Inside Airbnb dataset relies on periodic (e.g., monthly or quarterly) scrapes of forward-looking host availability calendars. Consequently, the constructed "daily panel" captures the variance of scheduled prices across future dates as they existed exactly on the step of the scrape, rather than continuous, high-frequency longitudinal price changes made in real-time. Therefore, the significant increase in rolling 7-step price variance observed among algorithmic adopters (Section 9.6) should be strictly interpreted as the algorithm populating the calendar with a highly differentiated, complex schedule of forward-looking price discrimination, rather than definitive proof of active, step-to-step dynamic adjustments occurring between scrape intervals.
 
 ## 8. Conclusion & Economic Implications
 Under the multicity baseline fuzzy-RDD/IV specification, we continue to find no large average discontinuous price-level effect at rollout timing. That baseline result remains central.
@@ -204,8 +204,8 @@ From an antitrust-risk perspective, this implies that surveillance should not re
 To move beyond cutoff-local level shifts, we implement a longitudinal panel extension in `data/processed/panel_extension/` using a structural-break adoption proxy and dynamic fixed-effects estimators.
 
 ### 9.1 Structural-break adoption proxy
-- Starting panel: `data/processed/day2/fact_listing_day_multicity_bw_3m.csv.gz` (24,228,568 listing-day rows).
-- For each listing, we construct daily absolute price changes and 7-day/14-day rolling volatility metrics.
+- Starting panel: `data/processed/step2/fact_listing_day_multicity_bw_3m.csv.gz` (24,228,568 listing-step rows).
+- For each listing, we construct daily absolute price changes and 7-step/14-step rolling volatility metrics.
 - `ruptures` was not available in the runtime, so break detection used a documented fallback CUSUM/binary-segmentation style procedure (`scripts/panel_extension_1_structural_breaks.py`) that flags a break only when post-break volatility exceeds pre-break volatility under minimum-segment and z-score/ratio criteria.
 - Output panel: `dynamic_proxy_panel.csv` with `dynamic_algo_adopted = 1` on/after the listing break date.
 
@@ -228,16 +228,16 @@ Key estimate (`twfe_results.csv`):
 - `dynamic_algo_adopted`: **-0.1118** (SE 0.0390, p = 0.0042; 95% CI [-0.1884, -0.0353])
 
 ### 9.3 Staggered DiD event study
-Event time is defined as calendar day relative to each listing’s detected break date, estimated on window \([-30, +30]\) with period \(-1\) omitted.
+Event time is defined as calendar step relative to each listing’s detected break date, estimated on window \([-30, +30]\) with period \(-1\) omitted.
 
 - Estimation uses listing and date FE with clustered SE by listing.
 - Sample keeps all treated listing windows and the same 1% control sample for date-level comparison (245,274 rows).
 - Coefficients and confidence intervals are reported in `event_study_coefficients.csv`; plot in `event_study_plot.png`.
 
-Empirically in this run, event-time coefficients are mostly positive both before and after the break proxy (e.g., day 0: 0.0727, p = 0.0086; day +5: 0.1318, p = 0.0043), with non-flat pre-trend levels (mean pre-period coefficient over [-30,-2] ≈ 0.0604). This pattern indicates that the detected break timing likely co-moves with pre-existing listing-level dynamics rather than isolating a clean quasi-experimental onset.
+Empirically in this run, event-time coefficients are mostly positive both before and after the break proxy (e.g., step 0: 0.0727, p = 0.0086; step +5: 0.1318, p = 0.0043), with non-flat pre-trend levels (mean pre-period coefficient over [-30,-2] ≈ 0.0604). This pattern indicates that the detected break timing likely co-moves with pre-existing listing-level dynamics rather than isolating a clean quasi-experimental onset.
 
 ### 9.4 Spillovers / neighborhood penetration
-We compute neighborhood-day algorithm penetration as the mean adoption among **other active listings** in the same city-neighborhood-date cell (own listing excluded from numerator and denominator). The secondary TWFE specification includes own adoption, neighborhood penetration, and their interaction:
+We compute neighborhood-step algorithm penetration as the mean adoption among **other active listings** in the same city-neighborhood-date cell (own listing excluded from numerator and denominator). The secondary TWFE specification includes own adoption, neighborhood penetration, and their interaction:
 \[
 \log(price_{it}) = \beta_1 own\_adopt_{it} + \beta_2 pen_{-i,nt} + \beta_3 (own\_adopt_{it}\times pen_{-i,nt}) + X'_{it}\gamma + \alpha_i + \tau_t + \varepsilon_{it}
 \]
@@ -269,8 +269,8 @@ The panel extension was re-run with explicit term-preserving exports and correct
 
 ## Reproducibility Pointers
 - Baseline script: `scripts/day4_multicity_fuzzy_rdd.py`
-- Baseline outputs: `data/processed/day4/`
-- Week 2 diagnostics: `data/processed/week2/`
+- Baseline outputs: `data/processed/step4/`
+- Stage 2 diagnostics: `data/processed/stage2/`
 - Longitudinal extension scripts: `scripts/panel_extension_1_structural_breaks.py`, `scripts/panel_extension_2_twfe.py`, `scripts/panel_extension_3_event_study.py`, `scripts/panel_extension_4_spillovers.py`, `scripts/panel_extension_run_all.py`
 - Longitudinal outputs: `data/processed/panel_extension/`
 - Interpretation notes: `docs/DAY4_interpretation_notes.md`, `docs/week2_*.md`

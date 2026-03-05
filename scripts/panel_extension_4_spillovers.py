@@ -12,7 +12,7 @@ from sklearn.neighbors import BallTree
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "data/processed/panel_extension"
-RAW_DAY2 = ROOT / "data/raw/day2"
+RAW_DAY2 = ROOT / "data/raw/step2"
 OUT.mkdir(parents=True, exist_ok=True)
 
 PANEL_PATH = OUT / "dynamic_proxy_panel.csv"

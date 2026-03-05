@@ -1,4 +1,4 @@
-# Day 1 Status
+# Step 1 Status
 
 ## Scope completed
 - Established core project framing around algorithmic pricing and competition effects in Airbnb.

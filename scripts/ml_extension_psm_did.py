@@ -21,7 +21,7 @@ import pandas as pd
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description="PSM + DiD around rollout")
     p.add_argument("--repo-root", default=".")
-    p.add_argument("--panel-file", default="data/processed/day2/fact_listing_day_multicity_bw_3m.csv.gz")
+    p.add_argument("--panel-file", default="data/processed/step2/fact_listing_day_multicity_bw_3m.csv.gz")
     p.add_argument("--proxy-file", default="data/processed/ml_extension/listing_latent_proxy.csv")
     p.add_argument("--event-min", type=int, default=-30)
     p.add_argument("--event-max", type=int, default=30)
