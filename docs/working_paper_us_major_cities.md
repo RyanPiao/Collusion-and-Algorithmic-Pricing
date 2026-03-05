@@ -189,6 +189,7 @@ These results do not replace the baseline Day 4 pooled null or the structural-br
 3. **Inference sensitivity:** clustered versus homoskedastic uncertainty can differ in very large panels.
 4. **Mechanism scope:** level effects alone are not sufficient to evaluate coordination-risk channels such as dispersion compression or dynamic co-movement.
 5. **City-level precision heterogeneity:** some city-window first stages are weak, limiting local interpretation.
+6. **Temporal Resolution and Calendar Snapshots:** The underlying Inside Airbnb dataset relies on periodic (e.g., monthly or quarterly) scrapes of forward-looking host availability calendars. Consequently, the constructed "daily panel" captures the variance of scheduled prices across future dates as they existed exactly on the day of the scrape, rather than continuous, high-frequency longitudinal price changes made in real-time. Therefore, the significant increase in rolling 7-day price variance observed among algorithmic adopters (Section 9.6) should be strictly interpreted as the algorithm populating the calendar with a highly differentiated, complex schedule of forward-looking price discrimination, rather than definitive proof of active, day-to-day dynamic adjustments occurring between scrape intervals.
 
 ## 8. Conclusion & Economic Implications
 Under the multicity baseline fuzzy-RDD/IV specification, we continue to find no large average discontinuous price-level effect at rollout timing. That baseline result remains central.
