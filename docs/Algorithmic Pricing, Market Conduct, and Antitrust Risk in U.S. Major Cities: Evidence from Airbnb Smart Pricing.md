@@ -46,7 +46,7 @@ These findings support the "Cognitive Constraint" hypothesis: pricing algorithms
 * **Citations:** Callaway & Sant'Anna (2021) for staggered DiD framework; Bai & Perron (1998) for structural break logic. 
 * **Next-Week Plan:** Switch to Synthetic Data (Week B). Build a theoretical matching market simulation to test how platform fee structures interact with algorithmic price ceilings.
 
-### 🎓 Teaching Note (For ECON 5200 / ECON 3916 / ECON 2516 / ECON 1116)
+### 🎓 Teaching Note (For ECON 5200 / ECON 3916 / ECON 2316 / ECON 1116)
 
 **Module:** Omitted Variable Bias & Unsupervised Proxies in Applied Data
 **Discussion Prompt:** In this project, a naive Machine Learning regression found a massive positive correlation between algorithmic pricing and rent levels. However, a Two-Way Fixed Effects (TWFE) panel model proved the true causal effect on price *levels* was zero. 
