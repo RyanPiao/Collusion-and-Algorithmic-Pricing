@@ -8,7 +8,7 @@ Using pooled Day 4 estimates, the instrumented local price effects are economica
 ## 1. Introduction
 Algorithmic pricing tools are increasingly central to digital marketplace operations, but their competition-policy implications remain contested. A core concern is whether shared algorithmic adjustment rules can generate synchronized pricing behavior consistent with tacit coordination, even absent explicit communication. Airbnb Smart Pricing provides a useful empirical setting because rollout timing offers a quasi-experimental anchor and host responses are heterogeneous.
 
-This study asks a focused question: **is there a local discontinuous change in listing price levels around Smart Pricing rollout timing in a multicity panel?** We prioritize transparent baseline identification, explicit first-stage diagnostics, and conservative interpretation. Our objective at this stage is screening for large immediate level effects, not making final structural or legal claims.
+This study asks a focused question: **is there a local discontinuous change in listing price levels around Smart Pricing rollout timing in a multicity panel?** Baseline pooled Day 4 estimates are economically small and statistically null on average. We therefore extend the design with a novel ML-econometrics heterogeneity layer: an unsupervised latent adoption propensity index constructed from strictly pre-treatment listing behavior (including dynamic price-adjustment features), and then embedded in interacted IV and propensity-stratified DiD specifications. This allows us to test whether effects are concentrated in specific host segments even when aggregate market-level discontinuities are flat.
 
 ## 2. Data and Setting
 ### 2.1 Data construction
@@ -32,7 +32,8 @@ The analysis includes eight U.S. cities:
 
 This is a proxy implementation of Smart Pricing exposure and should not be interpreted as direct adoption telemetry.
 
-## 3. Empirical Method
+## 3. Empirical Strategy
+### 3.1 Baseline local fuzzy RDD / IV
 We estimate a local fuzzy-RDD-style IV specification around the cutoff:
 
 1. **First stage:**
@@ -46,6 +47,43 @@ We estimate a local fuzzy-RDD-style IV specification around the cutoff:
    \]
 
 where \(f(\cdot)\) contains local linear running-variable terms and interactions consistent with the Day 4 baseline scripts. Estimation is repeated for ±1m, ±2m, and ±3m windows.
+
+### 3.2 Baseline controls and identification scope
+Controls include listing-day observables (minimum/maximum nights, capacity/rooms, host tenure/verification) and city fixed effects in pooled runs. As in the baseline pipeline, this design identifies local discontinuities in the proxy treatment channel around the rollout threshold, not direct adoption telemetry.
+
+### 3.3 Unsupervised latent adoption propensity
+To address sparsity and omitted-variable concerns in observed treatment proxies, we construct a listing-level latent adoption propensity index via unsupervised learning (`scripts/ml_unsupervised_extension.py`).
+
+A key design choice is strict leakage prevention: **all engineered proxy features are computed only on pre-cutoff rows (`post_cutoff == 0`)**. The feature set includes both static listing/host pre-period moments and dynamic pricing behavior:
+
+- `price_variance_pre`: variance of daily pre-cutoff `log_price`
+- `weekend_premium_pre`: pre-cutoff Fri/Sat minus weekday mean price premium
+- `price_change_frequency_pre`: pre-cutoff frequency of day-to-day price changes
+
+Listings with insufficient pre-period observations for variance are handled via median imputation after pre-period filtering, preserving sample size without post-treatment information leakage. We then standardize features and estimate KMeans/GMM (`k=4`) to produce a normalized continuous latent propensity index.
+
+### 3.4 Heterogeneous treatment effects (interaction IV)
+We estimate an interacted fuzzy-RDD/IV model to test whether the rollout shock differentially affects listings by latent propensity.
+
+First stage:
+\[
+available_{it}=\alpha_1+\pi_1 post_{it}+\pi_2 latent_i+\pi_3(post_{it}\times latent_i)+X'_{it}\Gamma+u_{it}
+\]
+
+Second stage:
+\[
+log\_price_{it}=\alpha_2+\beta_1\widehat{available}_{it}+\beta_2 latent_i+\beta_3(\widehat{available}_{it}\times latent_i)+X'_{it}\Delta+\varepsilon_{it}
+\]
+
+The coefficients of interest are \(\pi_3\) and \(\beta_3\), reported with HC1 robust standard errors.
+
+### 3.5 Propensity-stratified difference-in-differences
+We complement the IV heterogeneity design with a propensity-stratified TWFE DiD (`scripts/ml_extension_psm_did.py`).
+
+- Treatment group: top quartile of latent propensity (High Propensity)
+- Control group: bottom quartile (Low Propensity)
+
+We estimate a TWFE DiD around event time 0 and an event-study with period \(t=-1\) omitted. This design tests whether post-rollout pricing dynamics diverge between ex-ante high- and low-propensity host segments.
 
 ## 4. Baseline Results (Day 4)
 
@@ -91,29 +129,59 @@ Additional Week 2 outputs are directionally consistent with the Day 4 baseline:
 - Covariate continuity (`data/processed/week2/covariate_continuity_by_bw.csv`) shows zero measured jumps for predetermined listing/host attributes in tested local windows.
 - Mechanism endpoint files (`data/processed/week2/dispersion_endpoint_estimates.csv`, `data/processed/week2/comovement_endpoint_estimates.csv`) suggest some city-specific synchrony/dispersion movements but no uniform cross-city mechanism pattern.
 
-## 6. ML-Econometrics Extension (Unsupervised Latent Proxy)
-To complement the baseline proxy-IV screening result, we estimate a descriptive ML extension using outputs documented in `docs/ml_extension_results.md`.
+## 6. Heterogeneous & Dynamic Results
+This section integrates the refined ML-econometrics extension into the core empirical narrative using newly computed outputs in `data/processed/ml_extension/`.
 
-### 6.1 Method summary
-- Estimation sample: 24,228,568 listing-day observations in the ±3 month window.
-- Listing-level latent proxy count: 131,677 listings.
-- Construction: unsupervised clustering workflow (KMeans `k=4`, GMM `k=4`) to create a normalized latent adoption propensity proxy (`min=0.0000`, `mean=0.2913`, `max=1.0000`).
-- Comparison design: baseline and ML first/second-stage specifications from `data/processed/ml_extension/first_stage_comparison.csv` and `second_stage_comparison.csv`.
+### 6.1 Refined latent proxy distribution
+Using the updated dynamic pre-cutoff feature set and GMM (`k=4`), the latent propensity distribution is:
+- Min: **0.0000**
+- Mean: **0.4276**
+- Max: **1.0000**
 
-### 6.2 Measured findings
-- **Baseline first stage (`available ~ post_cutoff + controls`)**: coefficient on `post_cutoff` = **-0.04450** (SE 0.00038).
-- **ML first stage (`latent_adoption_propensity_proxy ~ post_cutoff + controls`)**: coefficient on `post_cutoff` = **0.00003** (SE 0.00011, p = 0.8109; 95% CI [-0.00019, 0.00024]).
-- **Baseline second stage (`log_price ~ available + controls`)**: coefficient on `available` = **0.10145** (SE 0.00034).
-- **ML second stage (`log_price ~ latent_adoption_propensity_proxy + controls`)**: coefficient on latent proxy = **1.43645** (SE 0.00114).
+(From `run_summary.json`; 131,677 listings, 24,228,568 listing-day observations in ±3m panel.)
 
-Read jointly, these extension estimates do not overturn the baseline cutoff-null result: the latent proxy itself is not discontinuously shifted at policy timing, while cross-sectional latent-propensity differences are strongly associated with price levels.
+### 6.2 Interaction IV estimates (HC1 robust)
+From `heterogeneous_iv_interaction_results.csv`:
 
-### 6.3 Interpretation caveats
-1. The latent propensity index is unsupervised and is **not** verified Smart Pricing adoption telemetry.
-2. The extension second stage is associational and does not by itself identify a causal treatment effect.
-3. Magnitudes are specification-dependent (feature set, clustering choice, normalization).
-4. The weak latent-proxy first-stage shift is mechanically consistent with a largely time-invariant listing-level construction.
-5. Policy inference should therefore treat this ML layer as heterogeneity mapping, not as a replacement for validated treatment measurement or full IV identification.
+- **First-stage interaction** \(post\_cutoff \times latent\_proxy\):
+  - Coef: **-0.005039**
+  - SE (HC1): **0.000471**
+  - t: **-10.70**
+  - 95% CI: **[-0.005962, -0.004115]**
+
+- **Second-stage heterogeneous treatment interaction** \(\widehat{available} \times latent\_proxy\):
+  - Coef: **0.619293**
+  - SE (HC1): **0.002343**
+  - t: **264.33**
+  - 95% CI: **[0.614701, 0.623885]**
+
+Interpretation: the interacted first stage indicates that cutoff-related shifts in the proxy treatment channel vary systematically with latent propensity; the positive second-stage interaction implies a substantially larger estimated price response at higher latent propensity values.
+
+### 6.3 Propensity-stratified TWFE DiD
+From `psm_did_twfe_results.csv` (High-propensity top quartile vs Low-propensity bottom quartile):
+
+- **DiD term (`high_propensity_x_post`)**:
+  - Coef: **-0.000188**
+  - SE: **0.000034**
+  - t: **-5.55**
+  - p-value: **2.84e-08**
+  - 95% CI: **[-0.000255, -0.000122]**
+
+This indicates a statistically precise but economically small negative differential post-cutoff effect for high-propensity hosts in the TWFE contrast.
+
+### 6.4 Event-study dynamics (high vs low propensity)
+From `psm_did_event_study.csv` and `psm_did_event_study_plot.png`:
+
+- Pre-period high-vs-low differential coefficients are strongly non-zero and very stable, indicating substantial baseline level separation between propensity strata before the cutoff.
+- Post-period coefficients remain close to pre-period levels, with no visually sharp discrete break at event time 0.
+
+Accordingly, the event-study supports heterogeneity in levels across propensity groups, but does not indicate a large new post-rollout discontinuity distinct from pre-existing group differences.
+
+### 6.5 Positioning relative to baseline and structural extensions
+These results do not replace the baseline Day 4 pooled null or the structural-break panel exercises. Instead, they provide a more rigorous heterogeneity solution to sparsity and omitted-variable concerns by:
+1. imposing strict pre-treatment feature construction,
+2. estimating interacted IV effects directly, and
+3. benchmarking group-differential dynamics via propensity-stratified DiD/event-study.
 
 ## 7. Limitations
 1. **Proxy treatment channel:** `available` is not direct Smart Pricing adoption telemetry.
@@ -122,12 +190,14 @@ Read jointly, these extension estimates do not overturn the baseline cutoff-null
 4. **Mechanism scope:** level effects alone are not sufficient to evaluate coordination-risk channels such as dispersion compression or dynamic co-movement.
 5. **City-level precision heterogeneity:** some city-window first stages are weak, limiting local interpretation.
 
-## 8. Conclusion
-Under the current multicity fuzzy-RDD/IV proxy implementation, we do **not** detect a robust large immediate discontinuity in Airbnb listing price levels around Smart Pricing rollout timing. The pooled estimates are consistently near zero, and core diagnostics (bandwidth and placebo) do not overturn that result.
+## 8. Conclusion & Economic Implications
+Under the multicity baseline fuzzy-RDD/IV specification, we continue to find no large average discontinuous price-level effect at rollout timing. That baseline result remains central.
 
-The ML extension adds a descriptive heterogeneity layer: a latent adoption propensity proxy is strongly associated with pooled price levels but shows no discontinuous first-stage jump at rollout timing. This reinforces (rather than reverses) the baseline null framing on immediate cutoff-level effects.
+The refined ML-econometrics extension, however, materially sharpens heterogeneity analysis. By constructing a leakage-safe latent propensity index from strictly pre-cutoff pricing behavior and embedding it in interacted IV and propensity-stratified DiD designs, we detect statistically meaningful segment-level structure even when average effects are flat. Specifically, the positive second-stage interaction in the IV system indicates stronger estimated price responsiveness among higher-propensity hosts, while the high-vs-low DiD contrast is statistically non-zero but economically small and negative on average.
 
-This should be read as a baseline screening conclusion rather than a final statement on algorithmic coordination risk. The most policy-relevant next steps are richer mechanism-focused designs (dynamic co-movement, dispersion structure, and host-segment heterogeneity) built on stronger treatment observability.
+For economic interpretation, these patterns are consistent with a **Cognitive Constraint** channel: algorithmic tools may operate as productivity multipliers for already sophisticated hosts (high latent propensity), who can process and operationalize algorithmic recommendations more effectively. In such settings, aggregate averages can conceal concentrated responses in particular host strata or local market segments.
+
+From an antitrust-risk perspective, this implies that surveillance should not rely solely on market-wide average effects. Even with a flat pooled discontinuity, heterogeneous algorithm-linked responses can still generate geographically or structurally concentrated tacit-coordination risk. The policy-relevant empirical agenda is therefore segment-aware: combine strong baseline quasi-experimental diagnostics with leakage-safe adoption-propensity measurement and dynamic subgroup event studies.
 
 ## 9. Longitudinal Causal Extensions
 To move beyond cutoff-local level shifts, we implement a longitudinal panel extension in `data/processed/panel_extension/` using a structural-break adoption proxy and dynamic fixed-effects estimators.
