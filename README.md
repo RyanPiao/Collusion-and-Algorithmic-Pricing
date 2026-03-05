@@ -20,7 +20,7 @@ How does increased exposure to Airbnb Smart Pricing affect host nightly pricing 
 ## Identification Strategy (Summary)
 The core design uses **announcement-date policy timing** with a **fuzzy RDD** implementation, supplemented by **Machine Learning** and **Longitudinal Panel** methods.
 
-1. **Baseline Fuzzy RDD / IV:** Uses Smart Pricing rollout timing (`post_cutoff`) as an instrument for listing-step availability (`available`) to test for immediate, market-wide level shifts.
+1. **Baseline Fuzzy RDD / IV:** Uses Smart Pricing rollout timing (`post_cutoff`) as an instrument for listing-day availability (`available`) to test for immediate, market-wide level shifts.
 2. **Unsupervised Latent Adoption Propensity:** Uses KMeans/GMM clustering on *strictly pre-cutoff* static and dynamic features (e.g., pre-cutoff price variance, weekend premiums) to identify host sophistication and proxy algorithmic uptake without post-treatment leakage.
 3. **Heterogeneous Treatment Effects (Interacted IV) & PSM-DiD:** Interacts the RDD instrument with the latent proxy, and runs a Propensity-Stratified Difference-in-Differences comparing the top quartile (High Propensity) to the bottom quartile (Low Propensity).
 4. **Structural Breaks & TWFE Panel:** Uses `ruptures` to detect behavioral shifts in rolling price variance to proxy exact adoption timing, then applies Two-Way Fixed Effects models to isolate within-listing changes in price levels and volatility.
@@ -29,14 +29,10 @@ The core design uses **announcement-date policy timing** with a **fuzzy RDD** im
 ```text
 .
 ├── README.md
-├── Step_1_Data_Cleaning.ipynb
-├── calendar_data_cleaning.ipynb
-├── Step_2_Data_Clustering.ipynb
-├── fuzzy_rdd_boston.ipynb
 ├── scripts/
-│   ├── day2_build_multicity_panels.py
-│   ├── day3_multicity_eda.py
-│   ├── day4_multicity_fuzzy_rdd.py
+│   ├── step2_build_multicity_panels.py
+│   ├── step3_multicity_eda.py
+│   ├── step4_multicity_fuzzy_rdd.py
 │   ├── ml_unsupervised_extension.py
 │   ├── ml_extension_psm_did.py
 │   ├── panel_extension_1_structural_breaks.py
@@ -50,6 +46,51 @@ The core design uses **announcement-date policy timing** with a **fuzzy RDD** im
 │   ├── processed/step4/ ... (generated Step 4 baseline IV outputs)
 │   ├── processed/ml_extension/ ... (generated ML interaction & PSM outputs)
 │   └── processed/panel_extension/ ... (generated TWFE & structural break outputs)
-└── docs/
-    ├── working_paper_us_major_cities.md
-    └── ... (design and status documentation)
+├── docs/
+│   ├── working_paper_us_major_cities.md
+│   └── ... (design and status documentation)
+└── Old/
+    ├── Step_1_Data_Cleaning.ipynb
+    ├── calendar_data_cleaning.ipynb
+    ├── Step_2_Data_Clustering.ipynb
+    └── fuzzy_rdd_boston.ipynb
+```
+
+## Baseline Results (Step 4 Multi-City Fuzzy RDD)
+- **First-stage relevance:** Strong across all windows (high F-statistics in ±1/±2/±3m).
+- **Second-stage pooled estimates:** Local price-level effects are close to zero and statistically imprecise across bandwidths (e.g., 0.27%–0.34% point estimates).
+- **Placebo checks:** Diagnostics do not show robust alternative breakpoints producing stable significant effects.
+- *Conclusion:* No large average discontinuous price-level effect at rollout timing. 
+
+## Refined ML-Econometrics Extension
+To address the omitted variable bias of cross-sectional naive models, we construct a leakage-safe **latent adoption propensity proxy** using pre-cutoff dynamic pricing behavior (`price_variance_pre`, `weekend_premium_pre`, `price_change_frequency_pre`).
+
+- **Heterogeneous IV Interaction:** First-stage and second-stage interactions indicate that cutoff-related shifts vary systematically with latent propensity; estimated price responsiveness is significantly stronger among higher-propensity hosts.
+- **Propensity-Stratified TWFE DiD:** Comparing the High-Propensity (top quartile) to Low-Propensity (bottom quartile) hosts yields a statistically precise but economically small negative differential post-cutoff effect. Pre-period differentials are non-zero, indicating baseline separation between groups.
+
+## Longitudinal Causal Extensions (TWFE & Volatility)
+To move beyond cutoff-local level shifts, we implement a longitudinal panel extension using a structural-break adoption proxy (`ruptures.Pelt`).
+
+- **Adoption Proxy:** Calibrated structural breaks capture a realistic 13.35% algorithmic adoption rate.
+- **TWFE Levels:** `dynamic_algo_adopted` on `log_price` is **0.0000446** (p = 0.1054). Confirms the null effect on average price levels.
+- **TWFE Volatility:** `dynamic_algo_adopted` on `rolling_7d_variance` is **0.0046971** (p < 0.001). Confirms algorithmic pricing drastically increases pricing flexibility.
+- **Spillovers / Tacit Collusion:** Interaction between own-adoption and 1km-radius neighborhood penetration is statistically weak (p = 0.4063), showing no evidence of localized price umbrellas.
+
+## Key Data Limitations
+1. **Temporal Resolution and Calendar Snapshots:** The underlying Inside Airbnb dataset relies on periodic (e.g., monthly or quarterly) scrapes of forward-looking host availability calendars. Consequently, the constructed "daily panel" captures the variance of scheduled prices across future dates as they existed exactly on the day of the scrape, rather than continuous, high-frequency longitudinal price changes made in real-time. Therefore, the significant increase in rolling 7-day price variance observed among algorithmic adopters should be strictly interpreted as the algorithm populating the calendar with a highly differentiated, complex schedule of forward-looking price discrimination, rather than definitive proof of active, day-to-day dynamic adjustments occurring between scrape intervals.
+2. **Proxy Telemetry:** We observe algorithmic behavioral footprints (availability proxies and structural volatility breaks) rather than direct internal Airbnb telemetry of exact user toggle behavior.
+
+## Reproducibility
+```bash
+source .venv/bin/activate
+
+# 1. Run Baseline Fuzzy RDD
+python scripts/step4_multicity_fuzzy_rdd.py
+
+# 2. Run ML Heterogeneity & PSM-DiD Models
+python scripts/ml_unsupervised_extension.py --repo-root .
+python scripts/ml_extension_psm_did.py
+
+# 3. Run Longitudinal Causal Extensions
+python scripts/panel_extension_run_all.py
+```
