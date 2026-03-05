@@ -1,4 +1,4 @@
-# 
+# Algorithmic Pricing, Market Conduct, and Antitrust Risk in U.S. Major Cities: Evidence from Airbnb Smart Pricing
 
 **1. Abstract**
 This project investigates whether the rollout of Airbnb's Smart Pricing algorithm caused a discontinuous jump in local market prices or fostered tacit collusion. Using a multicity panel and a combination of quasi-experimental and machine learning methods, we find no evidence of an average market-wide price level increase or localized spatial collusion. Instead, the algorithm acts as a productivity multiplier for sophisticated hosts, significantly increasing forward-looking price volatility and complex price discrimination without raising the baseline rent.
